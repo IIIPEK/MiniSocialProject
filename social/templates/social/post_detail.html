@@ -5,7 +5,7 @@
 <div class="container mt-4">
   <div class="card mb-4">
     <div class="card-header">
-      <strong>{{ post.author.username }}</strong> —
+      <strong>{{ post.author.username|default:"Удалённый пользователь" }}</strong> —
       {{ post.created_at|date:"d.m.Y H:i" }}
     </div>
     <div class="card-body">

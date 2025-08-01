@@ -7,7 +7,7 @@ def post_image_path(instance, filename):
 
 
 class Post(models.Model):
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='posts')
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
     content = models.TextField(max_length=1000)
     image = models.ImageField(upload_to=post_image_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -27,7 +27,7 @@ class Post(models.Model):
 
 class Comment(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
-    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True)
+    author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='comments')
     content = models.TextField('Комментарий')
     created_at = models.DateTimeField(auto_now_add=True)
 

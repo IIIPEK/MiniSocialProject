@@ -63,3 +63,4 @@ junit-*.xml
 *.pid
 docker-compose.override.yml
 
+/MiniSocialProject.zip
