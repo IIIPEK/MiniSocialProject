@@ -27,10 +27,22 @@
         <h3>Комментарии</h3>
 
         {% for comment in post.comments.all %}
-            <div class="mb-2 border p-2 rounded bg-light">
-                <strong>{{ comment.author.username }}</strong> —
-                <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
-                <p>{{ comment.content|linebreaks }}</p>
+            <div class="mb-2 border p-3 rounded bg-light">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong>{{ comment.author.username }}</strong> —
+                        <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                    </div>
+                    {% if user|can_delete_comment:comment %}
+                        <form method="post" action="{% url 'social:delete_comment' comment.id %}">
+                            {% csrf_token %}
+                            <button class="btn btn-sm btn-danger" onclick="return confirm('Удалить комментарий?')">
+                                Удалить
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+                <p class="mt-2 mb-0">{{ comment.content|linebreaks }}</p>
             </div>
         {% empty %}
             <p>Пока нет комментариев.</p>

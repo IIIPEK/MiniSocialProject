@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
@@ -7,7 +8,8 @@ from django.utils import timezone
 from .forms import PostForm, CommentForm
 from .models import Post,  Comment
 
-from utils.templatetags.rights import can_edit_post
+from utils.templatetags.rights import can_edit_post, can_delete_comment
+
 
 
 @login_required
@@ -78,3 +80,15 @@ def add_comment(request, post_id):
             comment.post = post
             comment.save()
     return redirect('social:post_detail', pk=post.id)
+
+@login_required
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(Comment, id=comment_id)
+
+    if not can_delete_comment(request.user, comment):
+        messages.error(request, "Вы не можете удалить этот комментарий.")
+        return redirect('social:post_detail', pk=comment.post.id)
+
+    comment.delete()
+    messages.success(request, "Комментарий удалён.")
+    return redirect('social:post_detail', pk=comment.post.id)

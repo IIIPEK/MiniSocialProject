@@ -1,5 +1,6 @@
 from django import template
 from datetime import timedelta
+from django.conf import settings
 from django.utils import timezone
 
 register = template.Library()
@@ -22,4 +23,10 @@ def can_edit_post(post, user):
     """Может ли пользователь редактировать пост (например, в течение 7 дней)"""
     if not hasattr(post, 'author') or post.author != user:
         return False
-    return post.created_at >= timezone.now() - timedelta(days=7)
+    return post.created_at >= timezone.now() - timedelta(days=getattr(settings, 'POST_DELETE_DAYS', 7))
+
+@register.filter
+def can_delete_comment(user, comment):
+    if comment.author != user:
+        return False
+    return timezone.now() - comment.created_at < timedelta(days=getattr(settings, 'COMMENT_DELETE_DAYS', 7))
