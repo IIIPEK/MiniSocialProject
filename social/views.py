@@ -65,3 +65,16 @@ def post_like_toggle(request, pk):
     else:
         post.likes.add(request.user)
     return HttpResponseRedirect(reverse('social:post_detail', args=[pk]))
+
+@login_required
+def add_comment(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if request.method == 'POST':
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.post = post
+            comment.save()
+    return redirect('social:post_detail', pk=post.id)

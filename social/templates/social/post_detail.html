@@ -2,43 +2,49 @@
 {% load rights %}
 {% block title %}Пост{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <div class="card mb-4">
-    <div class="card-header">
-      <strong>{{ post.author.username|default:"Удалённый пользователь" }}</strong> —
-      {{ post.created_at|date:"d.m.Y H:i" }}
-    </div>
-    <div class="card-body">
-      <p>{{ post.content|linebreaks }}</p>
-      {% if post.image %}
-        <img src="{{ post.image.url }}" class="img-fluid rounded">
-      {% endif %}
-    </div>
-    <form action="{% url 'social:post_like_toggle' post.pk %}" method="post" class="mb-3">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
-            ❤ {{ post.likes.count }}
-        </button>
-    </form>
+    <div class="container mt-4">
+        <div class="card mb-4">
+            <div class="card-header">
+                <strong>{{ post.author.username|default:"Удалённый пользователь" }}</strong> —
+                {{ post.created_at|date:"d.m.Y H:i" }}
+            </div>
+            <div class="card-body">
+                <p>{{ post.content|linebreaks }}</p>
+                {% if post.image %}
+                    <img src="{{ post.image.url }}" class="img-fluid rounded">
+                {% endif %}
+            </div>
+            <form action="{% url 'social:post_like_toggle' post.pk %}" method="post" class="mb-3">
+                {% csrf_token %}
+                <button type="submit"
+                        class="btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                    ❤ {{ post.likes.count }}
+                </button>
+            </form>
 
-  </div>
 
-  <h5 class="mt-4">Комментарии</h5>
-  {% for comment in comments %}
-    <div class="mb-3">
-      <strong>{{ comment.author.username if comment.author else "Удалённый пользователь" }}</strong>
-      <small class="text-muted">— {{ comment.created_at|date:"d.m.Y H:i" }}</small>
-      <p class="mb-1">{{ comment.content|linebreaks }}</p>
+        </div>
+        <h3>Комментарии</h3>
+
+        {% for comment in post.comments.all %}
+            <div class="mb-2 border p-2 rounded bg-light">
+                <strong>{{ comment.author.username }}</strong> —
+                <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
+                <p>{{ comment.content|linebreaks }}</p>
+            </div>
+        {% empty %}
+            <p>Пока нет комментариев.</p>
+        {% endfor %}
+
+        {% if user.is_authenticated %}
+            <form method="post">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Добавить комментарий</button>
+            </form>
+        {% else %}
+            <p><a href="{% url 'login' %}">Войдите</a>, чтобы оставить комментарий.</p>
+        {% endif %}
+
     </div>
-  {% empty %}
-    <p>Комментариев пока нет.</p>
-  {% endfor %}
-
-  <hr>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-primary">Отправить</button>
-  </form>
-</div>
 {% endblock %}
