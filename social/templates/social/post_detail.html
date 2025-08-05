@@ -33,19 +33,6 @@
                         <strong>{{ comment.author.username }}</strong> —
                         <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
                     </div>
-                    {#                    {% if user|can_delete_comment:comment %}#}
-                    {#                        <form method="post" action="{% url 'social:delete_comment' comment.id %}">#}
-                    {#                            {% csrf_token %}#}
-                    {#                            <button#}
-                    {#                                    class="btn btn-sm btn-outline-danger"#}
-                    {#                                    data-bs-toggle="modal"#}
-                    {#                                    data-bs-target="#confirmDeleteModal"#}
-                    {#                                    data-delete-url="{% url 'social:comment_delete' comment.id %}"#}
-                    {#                            >#}
-                    {#                                <i class="bi bi-trash"></i>#}
-                    {#                            </button>#}
-                    {#                        </form>#}
-                    {#                    {% endif %}#}
                     {% if user|can_delete_comment:comment %}
                         <button
                                 class="btn btn-sm btn-outline-danger"
