@@ -23,7 +23,16 @@ def can_edit_post(post, user):
     """Может ли пользователь редактировать пост (например, в течение 7 дней)"""
     if not hasattr(post, 'author') or post.author != user:
         return False
+    return post.created_at >= timezone.now() - timedelta(days=getattr(settings, 'POST_EDIT_DAYS', 7))
+
+@register.filter
+def can_delete_post(post, user):
+    """Может ли пользователь удалить пост (например, в течение 30 дней)"""
+    if not hasattr(post, 'author') or post.author != user:
+        return False
+    print(getattr(settings, 'POST_DELETE_DAYS', 7))
     return post.created_at >= timezone.now() - timedelta(days=getattr(settings, 'POST_DELETE_DAYS', 7))
+
 
 @register.filter
 def can_delete_comment(user, comment):

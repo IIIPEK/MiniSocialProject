@@ -33,19 +33,28 @@
                         <strong>{{ comment.author.username }}</strong> —
                         <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
                     </div>
+                    {#                    {% if user|can_delete_comment:comment %}#}
+                    {#                        <form method="post" action="{% url 'social:delete_comment' comment.id %}">#}
+                    {#                            {% csrf_token %}#}
+                    {#                            <button#}
+                    {#                                    class="btn btn-sm btn-outline-danger"#}
+                    {#                                    data-bs-toggle="modal"#}
+                    {#                                    data-bs-target="#confirmDeleteModal"#}
+                    {#                                    data-delete-url="{% url 'social:comment_delete' comment.id %}"#}
+                    {#                            >#}
+                    {#                                <i class="bi bi-trash"></i>#}
+                    {#                            </button>#}
+                    {#                        </form>#}
+                    {#                    {% endif %}#}
                     {% if user|can_delete_comment:comment %}
-                        <form method="post" action="{% url 'social:delete_comment' comment.id %}">
-                            {% csrf_token %}
-                            <button
-                                    type="button"
-                                    class="btn btn-sm btn-outline-danger"
-                                    data-bs-toggle="modal"
-                                    data-bs-target="#confirmDeleteModal"
-                                    data-comment-id="{{ comment.id }}"
-                            >
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </form>
+                        <button
+                                class="btn btn-sm btn-outline-danger"
+                                data-bs-toggle="modal"
+                                data-bs-target="#confirmDeleteModal"
+                                data-delete-url="{% url 'social:comment_delete' comment.id %}"
+                        >
+                            <i class="bi bi-trash"></i>
+                        </button>
                     {% endif %}
                 </div>
                 <p class="mt-2 mb-0">{{ comment.content|linebreaks }}</p>
@@ -65,34 +74,5 @@
         {% endif %}
 
     </div>
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <form method="post" id="deleteCommentForm">
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title" id="confirmDeleteLabel">Удалить комментарий?</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-        </div>
-        <div class="modal-body">
-          Вы действительно хотите удалить этот комментарий?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-          <button type="submit" class="btn btn-danger">Удалить</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-<script>
-  const deleteModal = document.getElementById('confirmDeleteModal');
-  const deleteForm = document.getElementById('deleteCommentForm');
 
-  deleteModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    const commentId = button.getAttribute('data-comment-id');
-    deleteForm.action = `/comments/${commentId}/delete/`;
-  });
-</script>
 {% endblock %}

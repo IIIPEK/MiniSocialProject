@@ -1,13 +1,25 @@
 {% extends 'base.html' %}
+{% load rights %}
 {% block title %}{% if edit %}Редактировать пост{% else %}Новый пост{% endif %}{% endblock %}
 {% block content %}
-<div class="container mt-4">
-  <h3>{% if edit %}Редактировать пост{% else %}Создать пост{% endif %}</h3>
-  <form method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Сохранить</button>
-    <a href="{% url 'social:post_list' %}" class="btn btn-secondary">Отмена</a>
-  </form>
-</div>
+    <div class="container mt-4">
+        <h3>{% if edit %}Редактировать пост{% else %}Создать пост{% endif %}</h3>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-success">Сохранить</button>
+            <a href="{% url 'social:post_list' %}" class="btn btn-secondary">Отмена</a>
+            {% if user|can_delete_post:post %}
+                <button
+                        class="btn btn-sm btn-outline-danger"
+                        data-bs-toggle="modal"
+                        data-bs-target="#confirmDeleteModal"
+                        data-delete-url="{% url 'social:post_delete' post.id %}"
+                >
+                    <i class="bi bi-trash"></i> Удалить пост
+                </button>
+            {% endif %}
+
+        </form>
+    </div>
 {% endblock %}

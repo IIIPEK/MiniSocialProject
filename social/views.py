@@ -8,7 +8,7 @@ from django.utils import timezone
 from .forms import PostForm, CommentForm
 from .models import Post,  Comment
 
-from utils.templatetags.rights import can_edit_post, can_delete_comment
+from utils.templatetags.rights import can_edit_post, can_delete_comment, can_delete_post
 
 
 
@@ -58,6 +58,17 @@ def post_detail(request, pk):
         'form': form
     })
 
+@login_required
+def post_delete(request, post_id):
+    post = get_object_or_404(Post, id=post_id)
+
+    if not can_delete_post(request.user, post):
+        messages.error(request, "Вы не можете удалить этот пост.")
+        return redirect('post_detail', pk=post.id)
+
+    post.delete()
+    messages.success(request, "Пост успешно удалён.")
+    return redirect('home')
 
 @login_required
 def post_like_toggle(request, pk):
@@ -69,7 +80,7 @@ def post_like_toggle(request, pk):
     return HttpResponseRedirect(reverse('social:post_detail', args=[pk]))
 
 @login_required
-def add_comment(request, post_id):
+def comment_add(request, post_id):
     post = get_object_or_404(Post, id=post_id)
 
     if request.method == 'POST':
@@ -82,7 +93,7 @@ def add_comment(request, post_id):
     return redirect('social:post_detail', pk=post.id)
 
 @login_required
-def delete_comment(request, comment_id):
+def comment_delete(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
 
     if not can_delete_comment(request.user, comment):
