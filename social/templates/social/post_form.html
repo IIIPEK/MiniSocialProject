@@ -9,7 +9,7 @@
             {{ form.as_p }}
             <button type="submit" class="btn btn-success">Сохранить</button>
             <a href="{% url 'social:post_list' %}" class="btn btn-secondary">Отмена</a>
-            {% if user|can_delete_post:user %}
+            {% if post|can_delete_post:user %}
                 <button
                         class="btn btn-sm btn-outline-danger"
                         data-bs-toggle="modal"
