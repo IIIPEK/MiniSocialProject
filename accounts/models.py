@@ -20,6 +20,12 @@ class CustomUser(AbstractUser):
     telegram = models.CharField(max_length=50, blank=True)
     whatsapp = models.CharField(max_length=50, blank=True)
     viber = models.CharField(max_length=50, blank=True)
+    following = models.ManyToManyField(
+        'self',
+        symmetrical=False,
+        related_name='followers',
+        blank=True
+    )
 
     REQUIRED_FIELDS = ['email']
 

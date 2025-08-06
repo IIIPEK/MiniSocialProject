@@ -5,15 +5,23 @@
     <div class="container mt-4">
         <div class="card mb-4">
             <div class="card-header">
-                <strong>{{ post.author.username|default:"Удалённый пользователь" }}</strong> —
+                <strong>
+                    {% if post.author %}
+                        Автор:
+                        <a href="{% url 'accounts:public_profile' post.author.username %}">{{ post.author.username }}</a>
+                    {% else %}
+                        <span class="text-muted">Автор удалён</span>
+                    {% endif %}
+                </strong> —
                 {{ post.created_at|date:"d.m.Y H:i" }}
             </div>
-            <div class="card-body">
+            <div class="card-body gap-2">
                 <p>{{ post.content|linebreaks }}</p>
                 {% if post.image %}
                     <img src="{{ post.image.url }}" class="img-fluid rounded">
                 {% endif %}
             </div>
+            <div class="card-footer">
             <form action="{% url 'social:post_like_toggle' post.pk %}" method="post" class="mb-3">
                 {% csrf_token %}
                 <button type="submit"
@@ -21,6 +29,7 @@
                     ❤ {{ post.likes.count }}
                 </button>
             </form>
+            </div>
 
 
         </div>

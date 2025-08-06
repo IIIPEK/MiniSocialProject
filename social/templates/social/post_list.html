@@ -6,25 +6,41 @@
         <h3 class="mb-4">Лента постов</h3>
         <a href="{% url 'social:post_create' %}" class="btn btn-primary mb-3">Создать пост</a>
         {% for post in posts %}
-            <div class="card mb-4">
+            <div class="card mb-3">
                 <div class="card-header d-flex justify-content-between">
-                    <strong>{{ post.author.username|default:"Удалённый пользователь" }}</strong>
+                    <h5>{{ post.title }}</h5>
                     <small class="text-muted">{{ post.created_at|date:"d.m.Y H:i" }}</small>
                 </div>
                 <div class="card-body">
-                    <p>{{ post.content|linebreaks }}</p>
+                    <p class="card-text">{{ post.content|truncatechars:200 }}</p>
                     {% if post.image %}
                         <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Изображение">
                     {% endif %}
-                    {% if post|can_edit_post:user %}
-                        <a href="{% url 'social:post_edit' post.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
-                    {% else %}
-                        <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-outline-secondary">Подробнее</a>
-                    {% endif %}
+                </div>
+                <div class="card-footer text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-1">
+                        ❤ {{ post.likes.count }} &nbsp;&nbsp; 💬 {{ post.comments.count }}&nbsp;&nbsp;&nbsp;&nbsp;
+                        <div>
+                            <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                        </div>
+                        {% if post|can_edit_post:user %}
+                            <div>
+                                <a href="{% url 'social:post_edit' post.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if post.author %}
+                            Автор:
+                            <a href="{% url 'accounts:public_profile' post.author.username %}">{{ post.author.username }}</a>
+                        {% else %}
+                            <span class="text-muted">Автор удалён</span>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         {% empty %}
-            <p>Пока нет постов.</p>
+            <p>Постов пока нет.</p>
         {% endfor %}
     </div>
 {% endblock %}

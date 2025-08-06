@@ -8,6 +8,7 @@ def post_image_path(instance, filename):
 
 class Post(models.Model):
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name='posts')
+    title = models.CharField("Заголовок", max_length=200)
     content = models.TextField(max_length=1000)
     image = models.ImageField(upload_to=post_image_path, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -22,7 +23,8 @@ class Post(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f'{self.author.username}: {self.content[:30]}...'
+        return f"{self.title} — {self.author.username}"
+        # return f'{self.author.username}: {self.content[:30]}...'
 
 
 class Comment(models.Model):

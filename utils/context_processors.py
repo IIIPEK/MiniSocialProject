@@ -3,6 +3,8 @@ from django.conf import settings
 
 def menu_context(request):
     menu = [
+        {'title': 'Главная', 'url': reverse('core:home')},
+        {'title': 'Пользователи', 'url': reverse('accounts:user_list')},
         {'title': 'Лента', 'url': reverse('social:post_list')},
     ]
 

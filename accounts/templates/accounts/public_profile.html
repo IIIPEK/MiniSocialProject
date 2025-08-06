@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% block content %}
+    <div class="container">
+        <h2>{{ profile_user.username }}</h2>
+        {% if profile_user.avatar %}
+            <img src="{{ profile_user.avatar.url }}" alt="Avatar" class="img-thumbnail mb-2" style="max-width: 150px;">
+        {% endif %}
+        <p><strong>Имя:</strong> {{ profile_user.first_name }} {{ profile_user.last_name }}</p>
+        <p><strong>Сейчас:</strong> {{ profile_user.status_message }}</p>
+        <p><strong>О себе:</strong> {{ profile_user.bio }}</p>
+        <p><strong>Зарегистрирован:</strong> {{ profile_user.date_joined|date:"d.m.Y" }}</p>
+        {% if user.is_authenticated and user != profile_user %}
+            <form method="post" action="{% url 'accounts:toggle_follow' profile_user.username %}">
+                {% csrf_token %}
+                {% if profile_user in user.following.all %}
+                    <button class="btn btn-sm btn-outline-danger">Отписаться</button>
+                {% else %}
+                    <button class="btn btn-sm btn-success">Подписаться</button>
+                {% endif %}
+            </form>
+        {% endif %}
+
+
+        <hr>
+        <h4>Посты</h4>
+        {% for post in posts %}
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5>{{ post.title }}</h5>
+                    <small class="text-muted">Опубликовано: {{ post.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <div class="card-body">
+                    <p>{{ post.content|truncatewords:30 }}</p>
+                    <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-outline-primary">Читать</a>
+                </div>
+            </div>
+        {% empty %}
+            <p>Нет опубликованных постов.</p>
+        {% endfor %}
+    </div>
+{% endblock %}
