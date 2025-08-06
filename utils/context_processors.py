@@ -11,15 +11,23 @@ def menu_context(request):
     ]
 
     if request.user.is_authenticated:
+        profile_submenu = [
+            {'title': 'Профиль', 'url': reverse('accounts:profile')},
+            {'title': 'Редактировать', 'url': reverse('accounts:profile_edit')},
+            {'title': 'Сменить пароль', 'url': reverse('accounts:password_change')},
+        ]
+
+        # 👇 Добавим ссылку на админку для суперпользователей
+        if request.user.is_superuser:
+            profile_submenu.append({'title': 'Админка', 'url': reverse('admin:index')})
+
+        profile_submenu.append({'title': 'Выход', 'url': reverse('accounts:logout')})
+
         menu.append({
             'title': f'Профиль ({request.user.username})',
-            'submenu': [
-                {'title': 'Профиль', 'url': reverse('accounts:profile')},
-                {'title': 'Редактировать', 'url': reverse('accounts:profile_edit')},
-                {'title': 'Сменить пароль', 'url': reverse('accounts:password_change')},
-                {'title': 'Выход', 'url': reverse('accounts:logout')},
-            ]
+            'submenu': profile_submenu
         })
+
     else:
         menu.append({
             'title': 'Войти',
