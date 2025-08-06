@@ -1,18 +1,30 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container mt-4">
-    <h2>Пользователи</h2>
-    <ul class="list-group">
-        {% for user in users %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <a href="{% url 'accounts:public_profile' user.username %}">{{ user.username }}</a>
-                {% if user.first_name or user.last_name %}
-                    <span>{{ user.first_name }} {{ user.last_name }}</span>
-                {% endif %}
-            </li>
-        {% empty %}
-            <li class="list-group-item">Нет пользователей.</li>
-        {% endfor %}
-    </ul>
-</div>
+    <div class="container mt-4">
+        <h2>Пользователи</h2>
+        <ul class="list-group">
+            {% for user in users %}
+                <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between gap-2">
+                    <a href="{% url 'accounts:public_profile' user.username %}">{{ user.username }}</a>
+                    {% if user.first_name or user.last_name %}
+                        <span>{{ user.first_name }} {{ user.last_name }}</span>
+                    {% endif %}
+                    {% if request.user.is_authenticated and request.user != user %}
+                        <form method="post" action="{% url 'accounts:toggle_follow' user.username %}" class="mb-0">
+                            {% csrf_token %}
+                            {% if user in request.user.following.all %}
+                                <button class="btn btn-sm btn-outline-danger">Отписаться</button>
+                            {% else %}
+                                <button class="btn btn-sm btn-outline-primary">Подписаться</button>
+                            {% endif %}
+                        </form>
+                    {% else %}
+                        <div>Ваш профиль</div>
+                    {% endif %}
+                </li>
+            {% empty %}
+                <li class="list-group-item">Нет пользователей.</li>
+            {% endfor %}
+        </ul>
+    </div>
 {% endblock %}

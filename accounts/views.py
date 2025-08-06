@@ -75,6 +75,7 @@ User = get_user_model()
 
 def user_list(request):
     users = User.objects.filter(is_active=True).order_by('username')
+    print(users)
     return render(request, 'accounts/user_list.html', {'users': users})
 
 def public_profile(request, username):
