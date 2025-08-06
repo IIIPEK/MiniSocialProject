@@ -33,7 +33,7 @@
                         <strong>{{ comment.author.username }}</strong> —
                         <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
                     </div>
-                    {% if user|can_delete_comment:comment %}
+                    {% if comment|can_delete_comment:user %}
                         <button
                                 class="btn btn-sm btn-outline-danger"
                                 data-bs-toggle="modal"

@@ -10,7 +10,7 @@
             <button type="submit" class="btn btn-success">Сохранить</button>
             <a href="{% url 'social:post_list' %}" class="btn btn-secondary">Отмена</a>
             {% if post|can_delete_post:user %}
-                <button
+                <button type="button"
                         class="btn btn-sm btn-outline-danger"
                         data-bs-toggle="modal"
                         data-bs-target="#confirmDeleteModal"
@@ -18,8 +18,8 @@
                 >
                     <i class="bi bi-trash"></i> Удалить пост
                 </button>
+        </form>
             {% endif %}
 
-        </form>
     </div>
 {% endblock %}

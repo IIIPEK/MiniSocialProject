@@ -36,8 +36,7 @@ def can_delete_post(post, user):
 
 
 @register.filter
-def can_delete_comment(user, comment):
+def can_delete_comment(comment, user):
     if comment.author != user:
         return False
-    print(getattr(settings, 'POST_DELETE_DAYS', 7))
     return timezone.now() - comment.created_at < timedelta(days=getattr(settings, 'COMMENT_DELETE_DAYS', 7))

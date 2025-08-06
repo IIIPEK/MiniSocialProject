@@ -33,7 +33,7 @@ def post_edit(request, pk):
     if form.is_valid():
         form.save()
         return redirect('social:post_list')
-    return render(request, 'social/post_form.html', {'form': form, 'edit': True})
+    return render(request, 'social/post_form.html', {'form': form, 'edit': True, 'post': post})
 
 @login_required
 def post_list(request):
@@ -61,14 +61,15 @@ def post_detail(request, pk):
 @login_required
 def post_delete(request, post_id):
     post = get_object_or_404(Post, id=post_id)
+    print(post)
 
-    if not can_delete_post(request.user, post):
+    if not can_delete_post(post,request.user):
         messages.error(request, "Вы не можете удалить этот пост.")
-        return redirect('post_detail', pk=post.id)
+        return redirect('social:post_edit', pk=post.id)
 
     post.delete()
     messages.success(request, "Пост успешно удалён.")
-    return redirect('home')
+    return redirect('social:post_list')
 
 @login_required
 def post_like_toggle(request, pk):
@@ -96,7 +97,7 @@ def comment_add(request, post_id):
 def comment_delete(request, comment_id):
     comment = get_object_or_404(Comment, id=comment_id)
 
-    if not can_delete_comment(request.user, comment):
+    if not can_delete_comment(comment, request.user):
         messages.error(request, "Вы не можете удалить этот комментарий.")
         return redirect('social:post_detail', pk=comment.post.id)
 
