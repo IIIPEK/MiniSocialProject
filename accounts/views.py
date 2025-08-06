@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import update_session_auth_hash
+from django.views.decorators.http import require_POST
 
 from .forms import CustomUserCreationForm
 from .forms import ProfileUpdateForm, CustomPasswordChangeForm
@@ -79,12 +80,17 @@ def user_list(request):
 def public_profile(request, username):
     user_profile = get_object_or_404(User, username=username)
     posts = user_profile.posts.all()
+    followers_count = user_profile.followers.count()
+    following_count = user_profile.following.count()
     return render(request, 'accounts/public_profile.html', {
         'profile_user': user_profile,
         'posts': posts,
+        'followers_count': followers_count,
+        'following_count': following_count,
     })
 
 @login_required
+@require_POST
 def toggle_follow(request, username):
     target_user = get_object_or_404(User, username=username)
     if request.user == target_user:

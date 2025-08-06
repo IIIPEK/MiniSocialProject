@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -35,9 +36,19 @@ def post_edit(request, pk):
         return redirect('social:post_list')
     return render(request, 'social/post_form.html', {'form': form, 'edit': True, 'post': post})
 
-@login_required
+#@login_required
 def post_list(request):
-    posts = Post.objects.select_related('author').all()
+    posts = Post.objects.select_related('author').prefetch_related('comments', 'likes')
+    if request.user.is_authenticated:
+        filter_type = request.GET.get('filter')
+        if filter_type == 'following':
+            posts = posts.filter(author__in=request.user.following.all())
+        elif filter_type == 'not_following':
+            posts = posts.exclude(Q(author__in=request.user.following.all()) | Q(author=request.user))
+        elif filter_type == 'followers':
+            posts = posts.filter(author__in=request.user.followers.all())
+
+    posts = posts.order_by('-created_at')
     return render(request, 'social/post_list.html', {'posts': posts})
 
 

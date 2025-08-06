@@ -9,6 +9,10 @@
         <p><strong>Сейчас:</strong> {{ profile_user.status_message }}</p>
         <p><strong>О себе:</strong> {{ profile_user.bio }}</p>
         <p><strong>Зарегистрирован:</strong> {{ profile_user.date_joined|date:"d.m.Y" }}</p>
+        <p>
+            Подписчиков: {{ followers_count }}<br>
+            Подписок: {{ following_count }}
+        </p>
         {% if user.is_authenticated and user != profile_user %}
             <form method="post" action="{% url 'accounts:toggle_follow' profile_user.username %}">
                 {% csrf_token %}
@@ -19,13 +23,66 @@
                 {% endif %}
             </form>
         {% endif %}
+        <hr>
+        <div class="row mt-4">
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Подписчики ({{ followers_count }})
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for follower in profile_user.followers.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{% url 'accounts:public_profile' follower.username %}">
+                                    {{ follower.username }}
+                                </a>
+
+                                {% if user.is_authenticated and user != follower and follower not in user.following.all %}
+                                    <form method="post" action="{% url 'accounts:toggle_follow' follower.username %}" class="mb-0">
+                                        {% csrf_token %}
+                                        <button class="btn btn-sm btn-outline-primary">Подписаться</button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">Нет подписчиков</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card mb-3">
+                    <div class="card-header">
+                        Подписки ({{ following_count }})
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        {% for following in profile_user.following.all %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <a href="{% url 'accounts:public_profile' following.username %}">
+                                    {{ following.username }}
+                                </a>
+                                {% if user.is_authenticated and user == profile_user %}
+                                    <form method="post" action="{% url 'accounts:toggle_follow' following.username %}" class="mb-0">
+                                        {% csrf_token %}
+                                        <button class="btn btn-sm btn-outline-danger">Отписаться</button>
+                                    </form>
+                                {% endif %}
+                            </li>
+                        {% empty %}
+                            <li class="list-group-item text-muted">Ни на кого не подписан</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
 
 
         <hr>
         <h4>Посты</h4>
         {% for post in posts %}
             <div class="card mb-3">
-                <div class="card-header">
+                <div class="card-header text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
                     <h5>{{ post.title }}</h5>
                     <small class="text-muted">Опубликовано: {{ post.created_at|date:"d.m.Y H:i" }}</small>
                 </div>
