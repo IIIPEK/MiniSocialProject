@@ -1,5 +1,7 @@
+from datetime import datetime
 from django.urls import reverse
 from django.conf import settings
+
 
 def menu_context(request):
     menu = [
@@ -27,4 +29,4 @@ def menu_context(request):
             ]
         })
 
-    return {'menu_items': menu,'main_title': settings.MAIN_TITLE}
+    return {'menu_items': menu,'main_title': settings.MAIN_TITLE,'year': datetime.now().year,}

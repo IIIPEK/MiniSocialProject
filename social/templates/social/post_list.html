@@ -12,7 +12,7 @@
             <a href="?filter=followers" class="btn btn-sm btn-outline-success">Кто читает меня</a>
         </div>
 
-        {% for post in posts %}
+        {% for post in page_obj %}
             <div class="card mb-3">
                 <div class="card-header d-flex justify-content-between">
                     <h5>{{ post.title }}</h5>
@@ -21,7 +21,7 @@
                 <div class="card-body">
                     <p class="card-text">{{ post.content|truncatechars:200 }}</p>
                     {% if post.image %}
-                        <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Изображение">
+                        <img src="{{ post.image.url }}" class="img-fluid rounded d-block mx-auto my-3" alt=""Изображение к посту #{{ post.id }}{% if post.author %} пользователя {{ post.author.username }}{% endif %}">
                     {% endif %}
                 </div>
                 <div class="card-footer text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
@@ -49,5 +49,25 @@
         {% empty %}
             <p>Постов пока нет.</p>
         {% endfor %}
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
     </div>
 {% endblock %}

@@ -3,7 +3,7 @@
     <div class="container mt-4">
         <h2>Пользователи</h2>
         <ul class="list-group">
-            {% for user in users %}
+            {% for user in page_obj %}
                 <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between gap-2">
                     <a href="{% url 'accounts:public_profile' user.username %}">{{ user.username }}</a>
                     {% if user.first_name or user.last_name %}
@@ -26,5 +26,25 @@
                 <li class="list-group-item">Нет пользователей.</li>
             {% endfor %}
         </ul>
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
     </div>
+
 {% endblock %}

@@ -22,20 +22,20 @@
                 {% endif %}
             </div>
             <div class="card-footer">
-            <form action="{% url 'social:post_like_toggle' post.pk %}" method="post" class="mb-3">
-                {% csrf_token %}
-                <button type="submit"
-                        class="btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                    ❤ {{ post.likes.count }}
-                </button>
-            </form>
+                <form action="{% url 'social:post_like_toggle' post.pk %}" method="post" class="mb-3">
+                    {% csrf_token %}
+                    <button type="submit"
+                            class="btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                        ❤ {{ post.likes.count }}
+                    </button>
+                </form>
             </div>
 
 
         </div>
         <h3>Комментарии</h3>
 
-        {% for comment in post.comments.all %}
+        {% for comment in page_obj %}
             <div class="mb-2 border p-3 rounded bg-light">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
@@ -58,6 +58,25 @@
         {% empty %}
             <p>Пока нет комментариев.</p>
         {% endfor %}
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
 
         {% if user.is_authenticated %}
             <form method="post">

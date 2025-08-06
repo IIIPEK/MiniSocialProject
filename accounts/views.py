@@ -1,6 +1,7 @@
 from django.contrib.auth import login, logout, get_user_model
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import update_session_auth_hash
 from django.views.decorators.http import require_POST
@@ -75,8 +76,10 @@ User = get_user_model()
 
 def user_list(request):
     users = User.objects.filter(is_active=True).order_by('username')
-    print(users)
-    return render(request, 'accounts/user_list.html', {'users': users})
+    paginator = Paginator(users, 10)  # по 10 пользователей на страницу
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'accounts/user_list.html', {'page_obj': page_obj})
 
 def public_profile(request, username):
     user_profile = get_object_or_404(User, username=username)

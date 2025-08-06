@@ -10,83 +10,90 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 </head>
-<body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-  <div class="container-fluid">
-    <a class="navbar-brand" href="{% url 'core:home' %}">{{ main_title }}</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        {% for item in menu_items %}
-          {% if item.submenu %}
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                {{ item.title|safe }}
-              </a>
-              <ul class="dropdown-menu">
-                {% for sub in item.submenu %}
-                  <li><a class="dropdown-item" href="{{ sub.url }}">{{ sub.title|safe }}</a></li>
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top shadow">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'core:home' %}">{{ main_title }}</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                {% for item in menu_items %}
+                    {% if item.submenu %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                {{ item.title|safe }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                {% for sub in item.submenu %}
+                                    <li><a class="dropdown-item" href="{{ sub.url }}">{{ sub.title|safe }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ item.url }}">{{ item.title|safe }}</a>
+                        </li>
+                    {% endif %}
                 {% endfor %}
-              </ul>
-            </li>
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="{{ item.url }}">{{ item.title|safe }}</a>
-            </li>
-          {% endif %}
-        {% endfor %}
-      </ul>
+            </ul>
+        </div>
     </div>
-  </div>
 </nav>
+<main class="flex-fill">
+    <div class="container mt-5 pt-4">
+        {% if messages %}
+            {% for msg in messages %}
+                <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
+            {% endfor %}
+        {% endif %}
 
-<div class="container">
-  {% if messages %}
-    {% for msg in messages %}
-      <div class="alert alert-{{ msg.tags }}">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
-
-  {% block content %}{% endblock %}
-</div>
-<!-- УНИВЕРСАЛЬНОЕ МОДАЛЬНОЕ ОКНО -->
-<div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content">
-      <form method="post" id="universalDeleteForm">
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title" id="confirmDeleteLabel">Подтверждение удаления</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
-        </div>
-        <div class="modal-body">
-          Вы уверены, что хотите удалить этот объект?
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
-          <button type="submit" class="btn btn-danger">Удалить</button>
-        </div>
-      </form>
+        {% block content %}{% endblock %}
     </div>
-  </div>
-</div>
-
+    <!-- УНИВЕРСАЛЬНОЕ МОДАЛЬНОЕ ОКНО -->
+    <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteLabel"
+         aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <form method="post" id="universalDeleteForm">
+                    {% csrf_token %}
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteLabel">Подтверждение удаления</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Закрыть"></button>
+                    </div>
+                    <div class="modal-body">
+                        Вы уверены, что хотите удалить этот объект?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
+                        <button type="submit" class="btn btn-danger">Удалить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
 <script>
-  const universalModal = document.getElementById('confirmDeleteModal');
-  const deleteForm = document.getElementById('universalDeleteForm');
+    const universalModal = document.getElementById('confirmDeleteModal');
+    const deleteForm = document.getElementById('universalDeleteForm');
 
-  universalModal.addEventListener('show.bs.modal', function (event) {
-    const button = event.relatedTarget;
-    const deleteUrl = button.getAttribute('data-delete-url');
-    if (deleteUrl) {
-      deleteForm.action = deleteUrl;
-    }
-  });
+    universalModal.addEventListener('show.bs.modal', function (event) {
+        const button = event.relatedTarget;
+        const deleteUrl = button.getAttribute('data-delete-url');
+        if (deleteUrl) {
+            deleteForm.action = deleteUrl;
+        }
+    });
 </script>
 
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<footer class="bg-light text-center text-muted py-3 mt-5 border-top">
+    <div class="container">
+        <small>&copy; {{ year }} MiniSocial — Все права защищены</small>
+    </div>
+</footer>
+
 </body>
 </html>
