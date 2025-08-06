@@ -3,77 +3,83 @@
 {% block title %}Профиль{% endblock %}
 {% block content %}
 <div class="container mt-4">
-  <div class="row">
-    <div class="col-md-4 text-center">
-      {% if user.avatar %}
-        <img src="{{ user.avatar.url }}" class="img-thumbnail rounded-circle mb-3" width="200" height="200">
-      {% else %}
-        <img src="https://via.placeholder.com/200x200?text=Avatar" class="img-thumbnail rounded-circle mb-3">
-      {% endif %}
-      <h4>{{ user.get_full_name|default:user.username }}</h4>
-      {% if user.status_message %}
-        <p class="text-muted">{{ user.status_message }}</p>
-      {% endif %}
+    <div class="row">
+        <div class="col-md-4 text-center">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" class="img-thumbnail rounded-circle mb-3" width="200" height="200">
+            {% else %}
+            <img src="https://via.placeholder.com/200x200?text=Avatar" class="img-thumbnail rounded-circle mb-3">
+            {% endif %}
+            <h4>{{ user.get_full_name|default:user.username }}</h4>
+            {% if user.status_message %}
+            <p class="text-muted">{{ user.status_message }}</p>
+            {% endif %}
+            {% if user.is_superuser %}
+            <a href="{% url 'admin:index' %}" class="btn btn-outline-dark btn-sm">Админ-панель</a>
+            {% endif %}
+
+        </div>
+
+        <div class="col-md-8">
+            <h5 class="mb-3">Информация</h5>
+            <ul class="list-group list-group-flush mb-3">
+                {% if user.email %}
+                <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
+                {% endif %}
+                {% if user.website %}
+                <li class="list-group-item"><strong>Веб-сайт:</strong> <a href="{{ user.website }}" target="_blank">{{
+                    user.website }}</a></li>
+                {% endif %}
+                {% if user.location %}
+                <li class="list-group-item"><strong>Местоположение:</strong> {{ user.location }}</li>
+                {% endif %}
+                {% if user.date_of_birth %}
+                <li class="list-group-item"><strong>Дата рождения:</strong> {{ user.date_of_birth|date:"d.m.Y" }}</li>
+                {% endif %}
+            </ul>
+
+            {% if user.bio %}
+            <h5 class="mb-2">О себе</h5>
+            <p>{{ user.bio|linebreaks }}</p>
+            {% endif %}
+
+            {% if user.telegram or user.whatsapp or user.viber %}
+            <h5 class="mt-4">Мессенджеры</h5>
+            <ul class="list-group list-group-flush">
+                {% if user.telegram %}
+                <li class="list-group-item"><strong>Telegram:</strong> @{{ user.telegram }}</li>
+                {% endif %}
+                {% if user.whatsapp %}
+                <li class="list-group-item"><strong>WhatsApp:</strong> {{ user.whatsapp }}</li>
+                {% endif %}
+                {% if user.viber %}
+                <li class="list-group-item"><strong>Viber:</strong> {{ user.viber }}</li>
+                {% endif %}
+            </ul>
+            {% endif %}
+        </div>
     </div>
-
-    <div class="col-md-8">
-      <h5 class="mb-3">Информация</h5>
-      <ul class="list-group list-group-flush mb-3">
-        {% if user.email %}
-          <li class="list-group-item"><strong>Email:</strong> {{ user.email }}</li>
-        {% endif %}
-        {% if user.website %}
-          <li class="list-group-item"><strong>Веб-сайт:</strong> <a href="{{ user.website }}" target="_blank">{{ user.website }}</a></li>
-        {% endif %}
-        {% if user.location %}
-          <li class="list-group-item"><strong>Местоположение:</strong> {{ user.location }}</li>
-        {% endif %}
-        {% if user.date_of_birth %}
-          <li class="list-group-item"><strong>Дата рождения:</strong> {{ user.date_of_birth|date:"d.m.Y" }}</li>
-        {% endif %}
-      </ul>
-
-      {% if user.bio %}
-        <h5 class="mb-2">О себе</h5>
-        <p>{{ user.bio|linebreaks }}</p>
-      {% endif %}
-
-      {% if user.telegram or user.whatsapp or user.viber %}
-        <h5 class="mt-4">Мессенджеры</h5>
-        <ul class="list-group list-group-flush">
-          {% if user.telegram %}
-            <li class="list-group-item"><strong>Telegram:</strong> @{{ user.telegram }}</li>
-          {% endif %}
-          {% if user.whatsapp %}
-            <li class="list-group-item"><strong>WhatsApp:</strong> {{ user.whatsapp }}</li>
-          {% endif %}
-          {% if user.viber %}
-            <li class="list-group-item"><strong>Viber:</strong> {{ user.viber }}</li>
-          {% endif %}
-        </ul>
-      {% endif %}
-    </div>
-  </div>
     {% if posts %}
     <hr class="my-5">
     <h4>Ваши посты</h4>
     {% for post in posts %}
-      <div class="card mb-3">
+    <div class="card mb-3">
         <div class="card-body">
-          <p>{{ post.content|linebreaks }}</p>
-          {% if post.image %}
+            <p>{{ post.content|linebreaks }}</p>
+            {% if post.image %}
             <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Изображение">
-          {% endif %}
-          <small class="text-muted">Опубликовано: {{ post.created_at|date:"d.m.Y H:i" }}</small>
-          {% if post|can_edit_post:user %}
+            {% endif %}
+            <small class="text-muted">Опубликовано: {{ post.created_at|date:"d.m.Y H:i" }}</small>
+            {% if post|can_edit_post:user %}
             <div class="mt-2">
-              <a href="{% url 'social:post_edit' post.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                <a href="{% url 'social:post_edit' post.pk %}"
+                   class="btn btn-sm btn-outline-secondary">Редактировать</a>
             </div>
-          {% endif %}
+            {% endif %}
         </div>
-      </div>
+    </div>
     {% empty %}
-      <p>Вы пока не опубликовали ни одного поста.</p>
+    <p>Вы пока не опубликовали ни одного поста.</p>
     {% endfor %}
     {% endif %}
 </div>
