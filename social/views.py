@@ -61,7 +61,6 @@ def post_detail(request, pk):
 @login_required
 def post_delete(request, post_id):
     post = get_object_or_404(Post, id=post_id)
-    print(post)
 
     if not can_delete_post(post,request.user):
         messages.error(request, "Вы не можете удалить этот пост.")
