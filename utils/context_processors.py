@@ -36,5 +36,5 @@ def menu_context(request):
                 {'title': 'Регистрация', 'url': reverse('accounts:register')},
             ]
         })
-
-    return {'menu_items': menu,'main_title': settings.MAIN_TITLE,'year': datetime.now().year,}
+    notifications = {'link': reverse('social:notification_list'), 'unread': request.user.notifications.filter(is_read=False).count(),}
+    return {'menu_items': menu,'main_title': settings.MAIN_TITLE,'year': datetime.now().year, 'notifications': notifications}

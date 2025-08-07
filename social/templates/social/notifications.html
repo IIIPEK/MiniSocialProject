@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% load rights %}
+{% block title %}Лента постов{% endblock %}
+{% block content %}
+    <div class="container mt-4">
+        <h3 class="mb-4">Лента оповещений</h3>
+
+        {% for post in notifications %}
+            <div class="card mb-3">
+                <div class="card-header d-flex justify-content-between">
+                    <h5>{{ post.actor }}</h5>
+                    <small class="text-muted">{{ post.created_at|date:"d.m.Y H:i" }}</small>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ post.verb }}</p>
+                </div>
+                <div class="card-footer text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
+                    <div class="d-flex flex-column flex-sm-row justify-content-between gap-1">
+                        {% if user|can_interact %}
+                            <form class="like-form" data-post-id="{{ post.pk }}" method="post"
+                                  action="{% url 'social:post_like_toggle' post.pk %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="like-button btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                    ❤ <span class="like-count">{{ post.likes.count }}</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            ❤ {{ post.likes.count }}
+                        {% endif %}
+                        &nbsp;&nbsp; 💬 {{ post.comments.count }}&nbsp;&nbsp;&nbsp;&nbsp;
+                        <div>
+                            <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
+                        </div>
+                        {% if post|can_edit_post:user %}
+                            <div>
+                                <a href="{% url 'social:post_edit' post.pk %}" class="btn btn-sm btn-outline-secondary">Редактировать</a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div>
+                        {% if post.author %}
+                            Автор:
+                            <a href="{% url 'accounts:public_profile' post.author.username %}">{{ post.author.username }}</a>
+                        {% else %}
+                            <span class="text-muted">Автор удалён</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <p>Постов пока нет.</p>
+        {% endfor %}
+        <nav>
+            <ul class="pagination justify-content-center mt-3">
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Назад</a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item disabled">
+                    <span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span>
+                </li>
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Вперёд</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+
+    </div>
+{% endblock %}

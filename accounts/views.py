@@ -18,6 +18,7 @@ from .forms import CustomUserCreationForm
 from .forms import ProfileUpdateForm, CustomPasswordChangeForm
 from .models import CustomUser
 from social.models import Post
+from utils.notifications import create_notification
 from utils.templatetags.rights import can_edit_post
 
 User = get_user_model()
@@ -127,24 +128,11 @@ def toggle_follow(request, username):
         is_following = False
     else:
         request.user.following.add(target_user)
+        create_notification(actor=request.user, recipient=target_user, verb='follow')
         is_following = True
 
     response = JsonResponse({'success': True, 'is_following': is_following})
     return response
-
-
-# target_user = get_object_or_404(User, username=username)
-# if request.user == target_user:
-#     return redirect('accounts:public_profile', username=username)
-#
-# if request.user.following.filter(id=target_user.id).exists():
-#     request.user.following.remove(target_user)
-# else:
-#     request.user.following.add(target_user)
-# next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
-# return redirect(next_url)
-
-# return redirect('accounts:public_profile', username=username)
 
 
 def confirm_email(request, uidb64, token):

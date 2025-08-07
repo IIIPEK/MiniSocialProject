@@ -14,14 +14,14 @@
             Подписчиков: {{ followers_count }}<br>
             Подписок: {{ following_count }}
         </p>
-        {% if user.is_authenticated and user != profile_user %}
+        {% if user.is_authenticated and user != profile_user and user|can_interact %}
             <form action="{% url 'accounts:toggle_follow' profile_user.username %}"
                   method="post"
-                  class="ajax-follow-toggle d-inline">
+                  class="ajax-follow-toggle ajax-follow-reload d-inline">
                 {% csrf_token %}
                 <button type="submit"
-                        class="btn btn-sm {% if user in request.user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                    {% if user in request.user.following.all %}Отписаться{% else %}Подписаться{% endif %}
+                        class="btn btn-sm {% if profile_user in request.user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {% if profile_user in request.user.following.all %}Отписаться{% else %}Подписаться{% endif %}
                 </button>
             </form>
 

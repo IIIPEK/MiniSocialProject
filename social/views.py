@@ -10,6 +10,7 @@ from django.utils import timezone
 from .forms import PostForm, CommentForm
 from .models import Post,  Comment
 
+from utils.notifications import create_notification
 from utils.templatetags.rights import can_edit_post, can_delete_comment, can_delete_post
 
 
@@ -99,6 +100,7 @@ def post_like_toggle(request, pk):
     else:
         post.likes.add(user)
         liked = True
+        create_notification(actor=user, recipient=post.author, verb='like', target=post)
 
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
@@ -128,6 +130,7 @@ def comment_add(request, post_id):
             comment.author = request.user
             comment.post = post
             comment.save()
+        create_notification(actor=request.user, recipient=post.author, verb='comment', target=comment)
     return redirect('social:post_detail', pk=post.id)
 
 @login_required
@@ -141,3 +144,8 @@ def comment_delete(request, comment_id):
     comment.delete()
     messages.success(request, "Комментарий удалён.")
     return redirect('social:post_detail', pk=comment.post.id)
+
+@login_required
+def notification_list(request):
+    notifications = request.user.notifications.all().order_by('-created_at')
+    return render(request, 'social/notifications.html', {'notifications': notifications})

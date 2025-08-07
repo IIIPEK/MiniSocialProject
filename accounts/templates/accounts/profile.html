@@ -75,12 +75,12 @@
                         {% if post.image %}
                             <img src="{{ post.image.url }}" class="img-fluid rounded" alt="Изображение">
                         {% endif %}
-                        {% if post|can_edit_post:user %}
-                            <div class="mt-2">
-                                <a href="{% url 'social:post_edit' post.pk %}"
-                                   class="btn btn-sm btn-outline-secondary">Редактировать</a>
-                            </div>
-                        {% endif %}
+{#                        {% if post|can_edit_post:user %}#}
+{#                            <div class="mt-2">#}
+{#                                <a href="{% url 'social:post_edit' post.pk %}"#}
+{#                                   class="btn btn-sm btn-outline-secondary">Редактировать</a>#}
+{#                            </div>#}
+{#                        {% endif %}#}
                     </div>
                     <div class="card-footer text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
                         <div class="d-flex flex-column flex-sm-row justify-content-between gap-1">
@@ -100,7 +100,7 @@
                             <div>
                                 <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
                             </div>
-                            {% if post|can_edit_post:user %}
+                            {% if post|can_edit_post:user and user|can_interact %}
                                 <div>
                                     <a href="{% url 'social:post_edit' post.pk %}"
                                        class="btn btn-sm btn-outline-secondary">Редактировать</a>

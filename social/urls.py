@@ -12,4 +12,5 @@ urlpatterns = [
     path('<int:pk>/like/', views.post_like_toggle, name='post_like_toggle'),
     path('posts/<int:post_id>/comment/', views.comment_add, name='comment_add'),
     path('comments/<int:comment_id>/delete/', views.comment_delete, name='comment_delete'),
+    path('notifications/', views.notification_list, name='notification_list'),
 ]
