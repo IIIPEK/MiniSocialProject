@@ -6,6 +6,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
 from django.urls import reverse
@@ -21,6 +22,7 @@ from utils.templatetags.rights import can_edit_post
 
 User = get_user_model()
 
+
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -31,11 +33,13 @@ def login_view(request):
         form = AuthenticationForm()
     return render(request, 'accounts/login.html', {'form': form})
 
+
 def logout_view(request):
     if request.method == 'POST':
         logout(request)
         return redirect('accounts:login')
     return render(request, 'accounts/logout_confirm.html')
+
 
 def register_view(request):
     if request.method == 'POST':
@@ -48,6 +52,7 @@ def register_view(request):
         form = CustomUserCreationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+
 @login_required
 def profile_view(request):
     posts = Post.objects.filter(author=request.user).order_by('-created_at')
@@ -55,6 +60,7 @@ def profile_view(request):
         'user': request.user,
         'posts': posts,
     })
+
 
 @login_required
 def profile_edit_view(request):
@@ -66,6 +72,7 @@ def profile_edit_view(request):
     else:
         form = ProfileUpdateForm(instance=request.user)
     return render(request, 'accounts/profile_edit.html', {'form': form})
+
 
 @login_required
 def password_change_view(request):
@@ -79,7 +86,9 @@ def password_change_view(request):
         form = CustomPasswordChangeForm(user=request.user)
     return render(request, 'accounts/password_change.html', {'form': form})
 
+
 User = get_user_model()
+
 
 def user_list(request):
     users = User.objects.filter(is_active=True).order_by('username')
@@ -87,6 +96,7 @@ def user_list(request):
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'accounts/user_list.html', {'page_obj': page_obj})
+
 
 def public_profile(request, username):
     user_profile = get_object_or_404(User, username=username)
@@ -100,21 +110,41 @@ def public_profile(request, username):
         'following_count': following_count,
     })
 
+
 @login_required
 @require_POST
 def toggle_follow(request, username):
-    target_user = get_object_or_404(User, username=username)
-    if request.user == target_user:
-        return redirect('accounts:public_profile', username=username)
+    if request.user.username == username:
+        return JsonResponse({'success': False, 'error': 'Нельзя подписаться на самого себя.'})
 
-    if request.user.following.filter(id=target_user.id).exists():
+    try:
+        target_user = get_object_or_404(CustomUser, username=username)
+    except:
+        return JsonResponse({'success': False, 'error': 'Пользователь не найден.'})
+
+    if target_user in request.user.following.all():
         request.user.following.remove(target_user)
+        is_following = False
     else:
         request.user.following.add(target_user)
-    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
-    return redirect(next_url)
+        is_following = True
 
-    # return redirect('accounts:public_profile', username=username)
+    response = JsonResponse({'success': True, 'is_following': is_following})
+    return response
+
+
+# target_user = get_object_or_404(User, username=username)
+# if request.user == target_user:
+#     return redirect('accounts:public_profile', username=username)
+#
+# if request.user.following.filter(id=target_user.id).exists():
+#     request.user.following.remove(target_user)
+# else:
+#     request.user.following.add(target_user)
+# next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+# return redirect(next_url)
+
+# return redirect('accounts:public_profile', username=username)
 
 
 def confirm_email(request, uidb64, token):
@@ -132,6 +162,7 @@ def confirm_email(request, uidb64, token):
         messages.error(request, 'Ссылка подтверждения недействительна или устарела.')
 
     return redirect('accounts:login')
+
 
 @login_required
 def resend_activation_email(request):

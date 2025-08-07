@@ -102,42 +102,80 @@
 </script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    // AJAX для лайков
-    document.querySelectorAll('.like-form').forEach(form => {
-        form.addEventListener('submit', async function (e) {
-            e.preventDefault();
+    document.addEventListener('DOMContentLoaded', function () {
+        // AJAX для лайков
+        document.querySelectorAll('.like-form').forEach(form => {
+            form.addEventListener('submit', async function (e) {
+                e.preventDefault();
 
-            const postId = this.dataset.postId;
-            const url = this.action;
-            const csrftoken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+                const postId = this.dataset.postId;
+                const url = this.action;
+                const csrftoken = this.querySelector('[name=csrfmiddlewaretoken]').value;
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': csrftoken,
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-            });
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                });
 
-            if (response.ok) {
-                const data = await response.json();
-                const button = this.querySelector('.like-button');
-                const countSpan = this.querySelector('.like-count');
-                countSpan.textContent = data.likes_count;
-                if (data.liked) {
-                    button.classList.remove('btn-outline-danger');
-                    button.classList.add('btn-danger');
+                if (response.ok) {
+                    const data = await response.json();
+                    const button = this.querySelector('.like-button');
+                    const countSpan = this.querySelector('.like-count');
+                    countSpan.textContent = data.likes_count;
+                    if (data.liked) {
+                        button.classList.remove('btn-outline-danger');
+                        button.classList.add('btn-danger');
+                    } else {
+                        button.classList.remove('btn-danger');
+                        button.classList.add('btn-outline-danger');
+                    }
                 } else {
-                    button.classList.remove('btn-danger');
-                    button.classList.add('btn-outline-danger');
+                    alert('Ошибка при отправке лайка');
                 }
-            } else {
-                alert('Ошибка при отправке лайка');
-            }
+            });
         });
     });
-});
+</script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Обработка всех форм с классом .ajax-follow-toggle
+        document.querySelectorAll('.ajax-follow-toggle').forEach(form => {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+
+                const url = form.action;
+                const csrftoken = form.querySelector('[name=csrfmiddlewaretoken]').value;
+                const button = form.querySelector('button');
+
+                fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrftoken,
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            if (form.classList.contains('ajax-follow-reload')) {
+                                window.location.reload();
+                            }
+
+                            // Обновим текст кнопки
+                            button.textContent = data.is_following ? 'Отписаться' : 'Подписаться';
+                            button.classList.toggle('btn-outline-primary', !data.is_following);
+                            button.classList.toggle('btn-primary', data.is_following);
+                        } else if (data.error) {
+                            alert(data.error);
+                        }
+                    })
+                    .catch(error => console.error('Ошибка при подписке:', error));
+            });
+        });
+    });
 </script>
 
 <!-- Bootstrap 5 JS -->

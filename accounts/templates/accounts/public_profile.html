@@ -15,14 +15,16 @@
             Подписок: {{ following_count }}
         </p>
         {% if user.is_authenticated and user != profile_user %}
-            <form method="post" action="{% url 'accounts:toggle_follow' profile_user.username %}">
+            <form action="{% url 'accounts:toggle_follow' profile_user.username %}"
+                  method="post"
+                  class="ajax-follow-toggle d-inline">
                 {% csrf_token %}
-                {% if profile_user in user.following.all %}
-                    <button class="btn btn-sm btn-outline-danger">Отписаться</button>
-                {% else %}
-                    <button class="btn btn-sm btn-success">Подписаться</button>
-                {% endif %}
+                <button type="submit"
+                        class="btn btn-sm {% if user in request.user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                    {% if user in request.user.following.all %}Отписаться{% else %}Подписаться{% endif %}
+                </button>
             </form>
+
         {% endif %}
         <hr>
         <div class="row mt-4">
@@ -39,10 +41,15 @@
                                 </a>
 
                                 {% if user.is_authenticated and user != follower and follower not in user.following.all %}
-                                    <form method="post" action="{% url 'accounts:toggle_follow' follower.username %}"
-                                          class="mb-0">
+                                    <form action="{% url 'accounts:toggle_follow' follower.username %}"
+                                          method="post"
+                                          class="ajax-follow-toggle ajax-follow-reload d-inline">
                                         {% csrf_token %}
-                                        <button class="btn btn-sm btn-outline-primary">Подписаться</button>
+                                        <button type="submit"
+                                                class="btn btn-sm {% if follower in request.user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                            {% if follower in request.user.following.all %}Отписаться{% else %}
+                                                Подписаться{% endif %}
+                                        </button>
                                     </form>
                                 {% endif %}
                             </li>
@@ -65,10 +72,15 @@
                                     {{ following.username }}
                                 </a>
                                 {% if user.is_authenticated and user == profile_user %}
-                                    <form method="post" action="{% url 'accounts:toggle_follow' following.username %}"
-                                          class="mb-0">
+                                    <form action="{% url 'accounts:toggle_follow' following.username %}"
+                                          method="post"
+                                          class="ajax-follow-toggle ajax-follow-reload d-inline">
                                         {% csrf_token %}
-                                        <button class="btn btn-sm btn-outline-danger">Отписаться</button>
+                                        <button type="submit"
+                                                class="btn btn-sm {% if following in user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                            {% if following in user.following.all %}Отписаться{% else %}
+                                                Подписаться{% endif %}
+                                        </button>
                                     </form>
                                 {% endif %}
                             </li>
