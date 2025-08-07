@@ -33,9 +33,6 @@
                     </form>
                 {% else %}
                     ❤ {{ post.likes.count }}
-                    <div class="text-muted small">
-                        {{ user|get_interaction_restriction_reason }}
-                    </div>
                 {% endif %}
             </div>
 
