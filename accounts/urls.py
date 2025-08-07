@@ -17,6 +17,7 @@ urlpatterns = [
     path('password_reset/',
          auth_views.PasswordResetView.as_view(
              template_name='accounts/password_reset_form.html',
+             email_template_name='accounts/password_reset_email.html',
              success_url=reverse_lazy('accounts:password_reset_done')  # ✅ явно указано с namespace
          ),
          name='password_reset'
@@ -26,7 +27,8 @@ urlpatterns = [
                                                   ),
          name='password_reset_done'),
     path('reset/<uidb64>/<token>/',
-         auth_views.PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html'),
+         auth_views.PasswordResetConfirmView.as_view(template_name='accounts/password_reset_confirm.html',
+                                                     success_url=reverse_lazy('accounts:password_reset_complete'), ),
          name='password_reset_confirm'),
     path('reset/done/',
          auth_views.PasswordResetCompleteView.as_view(template_name='accounts/password_reset_complete.html'),
