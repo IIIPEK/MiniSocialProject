@@ -26,6 +26,7 @@ class CustomUser(AbstractUser):
         related_name='followers',
         blank=True
     )
+    is_email_confirmed = models.BooleanField(default=False)
 
     REQUIRED_FIELDS = ['email']
 
@@ -34,3 +35,38 @@ class CustomUser(AbstractUser):
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'.strip()
+
+    @property
+    def is_fully_active(self):
+        """
+        Гибкая проверка, разрешена ли активность:
+        - подтверждён email
+        - не заблокирован (в будущем можно добавить поле is_banned)
+        """
+        return self.is_active and self.is_email_confirmed
+
+
+# views.py
+from django.utils.http import urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.auth import get_user_model
+from django.shortcuts import redirect, render
+from django.contrib import messages
+
+User = get_user_model()
+
+def confirm_email(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_email_confirmed = True
+        user.save()
+        messages.success(request, 'Email подтвержден. Теперь вы можете пользоваться всеми функциями.')
+    else:
+        messages.error(request, 'Ссылка подтверждения недействительна или устарела.')
+
+    return redirect('accounts:login')

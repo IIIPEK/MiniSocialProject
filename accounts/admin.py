@@ -7,18 +7,51 @@ from django.contrib.admin.sites import AlreadyRegistered
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('username', 'email', 'is_staff', 'is_active', 'last_login')
-    search_fields = ('username', 'email')
-    ordering = ('username',)
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_email_confirmed', 'is_verified')
+    list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified', 'is_email_confirmed')
+
     fieldsets = UserAdmin.fieldsets + (
-        ('Дополнительно', {
+        ('Дополнительная информация', {
             'fields': (
-                'avatar', 'birth_date', 'website',
-                'telegram', 'whatsapp', 'viber',
-                'bio', 'status_message', 'karma'
+                'avatar',
+                'bio',
+                'status_message',
+                'karma',
+                'is_verified',
+                'location',
+                'website',
+                'date_of_birth',
+                'telegram',
+                'whatsapp',
+                'viber',
+                'following',
+                'is_email_confirmed',
             ),
         }),
     )
+
+    add_fieldsets = UserAdmin.add_fieldsets + (
+        ('Дополнительная информация', {
+            'fields': (
+                'avatar',
+                'bio',
+                'status_message',
+                'karma',
+                'is_verified',
+                'location',
+                'website',
+                'date_of_birth',
+                'telegram',
+                'whatsapp',
+                'viber',
+                'following',
+                'is_email_confirmed',
+            ),
+        }),
+    )
+
+    search_fields = ('username', 'email', 'first_name', 'last_name')
+    ordering = ('username',)
 
 # Авто-регистрация остальных моделей
 app = apps.get_app_config('accounts')

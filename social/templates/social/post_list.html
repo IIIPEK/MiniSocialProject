@@ -4,7 +4,9 @@
 {% block content %}
     <div class="container mt-4">
         <h3 class="mb-4">Лента постов</h3>
-        <a href="{% url 'social:post_create' %}" class="btn btn-primary mb-3">Создать пост</a>
+        {% if user|can_interact %}
+            <a href="{% url 'social:post_create' %}" class="btn btn-primary mb-3">Создать пост</a>
+        {% endif %}
         <div class="mb-3">
             <a href="?filter=all" class="btn btn-sm btn-outline-secondary">Все</a>
             <a href="?filter=following" class="btn btn-sm btn-outline-primary">Только подписки</a>
@@ -13,7 +15,7 @@
         </div>
 
         {% for post in page_obj %}
-            <div class="card mb-3">
+            <div id="post-{{ post.id }}" class="card mb-3">
                 <div class="card-header d-flex justify-content-between">
                     <h5>{{ post.title }}</h5>
                     <small class="text-muted">{{ post.created_at|date:"d.m.Y H:i" }}</small>
@@ -21,12 +23,26 @@
                 <div class="card-body">
                     <p class="card-text">{{ post.content|truncatechars:200 }}</p>
                     {% if post.image %}
-                        <img src="{{ post.image.url }}" class="img-fluid rounded d-block mx-auto my-3" alt=""Изображение к посту #{{ post.id }}{% if post.author %} пользователя {{ post.author.username }}{% endif %}">
+                        <img src="{{ post.image.url }}" class="img-fluid rounded d-block mx-auto my-3" alt=""
+                             Изображение к посту #
+                                {{ post.id }}{% if post.author %} пользователя {{ post.author.username }}{% endif %}">
                     {% endif %}
                 </div>
                 <div class="card-footer text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
                     <div class="d-flex flex-column flex-sm-row justify-content-between gap-1">
-                        ❤ {{ post.likes.count }} &nbsp;&nbsp; 💬 {{ post.comments.count }}&nbsp;&nbsp;&nbsp;&nbsp;
+                        {% if user|can_interact %}
+                            <form class="like-form" data-post-id="{{ post.pk }}" method="post"
+                                  action="{% url 'social:post_like_toggle' post.pk %}">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="like-button btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                                    ❤ <span class="like-count">{{ post.likes.count }}</span>
+                                </button>
+                            </form>
+                        {% else %}
+                            ❤ {{ post.likes.count }}
+                        {% endif %}
+                        &nbsp;&nbsp; 💬 {{ post.comments.count }}&nbsp;&nbsp;&nbsp;&nbsp;
                         <div>
                             <a href="{% url 'social:post_detail' post.pk %}" class="btn btn-sm btn-outline-primary">Подробнее</a>
                         </div>

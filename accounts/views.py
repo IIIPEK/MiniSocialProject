@@ -1,9 +1,16 @@
-from django.contrib.auth import login, logout, get_user_model
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.tokens import default_token_generator
+from django.core.mail import send_mail
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import update_session_auth_hash
+from django.template.loader import render_to_string
+from django.urls import reverse
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.http import require_POST
 
 from .forms import CustomUserCreationForm
@@ -104,5 +111,47 @@ def toggle_follow(request, username):
         request.user.following.remove(target_user)
     else:
         request.user.following.add(target_user)
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+    return redirect(next_url)
 
-    return redirect('accounts:public_profile', username=username)
+    # return redirect('accounts:public_profile', username=username)
+
+
+def confirm_email(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_email_confirmed = True
+        user.save()
+        messages.success(request, 'Email подтвержден. Теперь вы можете пользоваться всеми функциями.')
+    else:
+        messages.error(request, 'Ссылка подтверждения недействительна или устарела.')
+
+    return redirect('accounts:login')
+
+@login_required
+def resend_activation_email(request):
+    user = request.user
+    if user.is_email_confirmed:
+        messages.info(request, 'Email уже подтвержден.')
+        return redirect('accounts:profile')
+
+    token = default_token_generator.make_token(user)
+    uid = urlsafe_base64_encode(force_bytes(user.pk))
+    activation_link = request.build_absolute_uri(
+        reverse('accounts:confirm_email', kwargs={'uidb64': uid, 'token': token})
+    )
+
+    subject = 'Подтверждение Email'
+    message = render_to_string('accounts/email_confirmation_email.html', {
+        'user': user,
+        'activation_link': activation_link,
+    })
+
+    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
+    messages.success(request, 'Письмо с подтверждением отправлено на вашу почту.')
+    return redirect('accounts:profile')

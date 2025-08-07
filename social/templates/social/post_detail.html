@@ -22,13 +22,21 @@
                 {% endif %}
             </div>
             <div class="card-footer">
-                <form action="{% url 'social:post_like_toggle' post.pk %}" method="post" class="mb-3">
-                    {% csrf_token %}
-                    <button type="submit"
-                            class="btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
-                        ❤ {{ post.likes.count }}
-                    </button>
-                </form>
+                {% if user|can_interact %}
+                    <form class="like-form" data-post-id="{{ post.pk }}" method="post"
+                          action="{% url 'social:post_like_toggle' post.pk %}">
+                        {% csrf_token %}
+                        <button type="submit"
+                                class="like-button btn btn-sm {% if user in post.likes.all %}btn-danger{% else %}btn-outline-danger{% endif %}">
+                            ❤ <span class="like-count">{{ post.likes.count }}</span>
+                        </button>
+                    </form>
+                {% else %}
+                    ❤ {{ post.likes.count }}
+                    <div class="text-muted small">
+                        {{ user|get_interaction_restriction_reason }}
+                    </div>
+                {% endif %}
             </div>
 
 
@@ -79,11 +87,17 @@
         </nav>
 
         {% if user.is_authenticated %}
-            <form method="post">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Добавить комментарий</button>
-            </form>
+            {% if user|can_interact %}
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary btn-sm">Оставить комментарий</button>
+                </form>
+            {% else %}
+                <div class="alert alert-warning mt-3">
+                    {{ user|get_interaction_restriction_reason }}
+                </div>
+            {% endif %}
         {% else %}
             <p><a href="{% url 'login' %}">Войдите</a>, чтобы оставить комментарий.</p>
         {% endif %}

@@ -35,6 +35,23 @@ def can_delete_post(post, user):
 
 @register.filter
 def can_delete_comment(comment, user):
+    """Может ли пользователь удалить комментарий (например, в течение 7 дней)"""
     if comment.author != user:
         return False
     return timezone.now() - comment.created_at < timedelta(days=getattr(settings, 'COMMENT_DELETE_DAYS', 7))
+
+@register.filter
+def can_interact(user):
+    """
+    Проверка: можно ли пользователю взаимодействовать с контентом (лайкать, комментировать, публиковать).
+    Включает подтверждение email, активность и т.д.
+    """
+    return getattr(user, 'is_fully_active', False)
+
+@register.filter
+def get_interaction_restriction_reason(user):
+    if not getattr(user, 'is_active', False):
+        return "Ваш аккаунт не активен."
+    if not getattr(user, 'is_email_confirmed', False):
+        return "Требуется подтверждение email."
+    return ""

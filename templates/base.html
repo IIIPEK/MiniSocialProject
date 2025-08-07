@@ -41,6 +41,20 @@
         </div>
     </div>
 </nav>
+{% if request.user.is_authenticated and not user|can_interact %}
+    <div class="container mt-5 pt-4">
+        <div class="alert alert-info text-center">
+            🔒 Ограничения: {{ user|get_interaction_restriction_reason }}
+            {% if not user.is_email_confirmed %}
+                <br>
+                <a href="{% url 'accounts:resend_activation' %}" class="btn btn-sm btn-outline-primary mt-2">
+                    Подтвердить Email
+                </a>
+            {% endif %}
+        </div>
+    </div>
+{% endif %}
+
 <main class="flex-fill">
     <div class="container mt-5 pt-4">
         {% if messages %}
@@ -85,6 +99,45 @@
             deleteForm.action = deleteUrl;
         }
     });
+</script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    // AJAX для лайков
+    document.querySelectorAll('.like-form').forEach(form => {
+        form.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const postId = this.dataset.postId;
+            const url = this.action;
+            const csrftoken = this.querySelector('[name=csrfmiddlewaretoken]').value;
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': csrftoken,
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                const button = this.querySelector('.like-button');
+                const countSpan = this.querySelector('.like-count');
+                countSpan.textContent = data.likes_count;
+                if (data.liked) {
+                    button.classList.remove('btn-outline-danger');
+                    button.classList.add('btn-danger');
+                } else {
+                    button.classList.remove('btn-danger');
+                    button.classList.add('btn-outline-danger');
+                }
+            } else {
+                alert('Ошибка при отправке лайка');
+            }
+        });
+    });
+});
 </script>
 
 <!-- Bootstrap 5 JS -->

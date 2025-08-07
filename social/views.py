@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db.models import Q
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
 from django.utils import timezone
@@ -90,12 +90,32 @@ def post_delete(request, post_id):
 
 @login_required
 def post_like_toggle(request, pk):
-    post = get_object_or_404(Post, pk=pk)
-    if request.user in post.likes.all():
-        post.likes.remove(request.user)
+    post = get_object_or_404(Post, id=pk)
+    user = request.user
+
+    if user in post.likes.all():
+        post.likes.remove(user)
+        liked = False
     else:
-        post.likes.add(request.user)
-    return HttpResponseRedirect(reverse('social:post_detail', args=[pk]))
+        post.likes.add(user)
+        liked = True
+
+    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        return JsonResponse({
+            'liked': liked,
+            'likes_count': post.likes.count(),
+        })
+
+    next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+    return redirect(next_url)
+    # post = get_object_or_404(Post, pk=pk)
+    # if request.user in post.likes.all():
+    #     post.likes.remove(request.user)
+    # else:
+    #     post.likes.add(request.user)
+    # next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
+    # return redirect(next_url)
+    # # return HttpResponseRedirect(reverse('social:post_detail', args=[pk]))
 
 @login_required
 def comment_add(request, post_id):
