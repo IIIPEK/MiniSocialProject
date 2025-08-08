@@ -1,3 +1,4 @@
+#accounts/views.py
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash
