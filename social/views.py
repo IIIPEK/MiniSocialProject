@@ -71,6 +71,7 @@ def post_detail(request, pk):
         comment.post = post
         comment.author = request.user
         comment.save()
+        create_notification(actor=request.user, recipient=post.author, verb='comment', target=comment)
         return redirect('social:post_detail', pk=pk)
     return render(request, 'social/post_detail.html', {
         'post': post,
@@ -120,19 +121,20 @@ def post_like_toggle(request, pk):
     # return redirect(next_url)
     # # return HttpResponseRedirect(reverse('social:post_detail', args=[pk]))
 
-@login_required
-def comment_add(request, post_id):
-    post = get_object_or_404(Post, id=post_id)
-
-    if request.method == 'POST':
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = request.user
-            comment.post = post
-            comment.save()
-        create_notification(actor=request.user, recipient=post.author, verb='comment', target=comment)
-    return redirect('social:post_detail', pk=post.id)
+# @login_required
+# def comment_add(request, post_id):
+#     post = get_object_or_404(Post, id=post_id)
+#     print(post)
+#     if request.method == 'POST':
+#         form = CommentForm(request.POST)
+#         if form.is_valid():
+#             comment = form.save(commit=False)
+#             comment.author = request.user
+#             comment.post = post
+#             comment.save()
+#             print(comment)
+#             create_notification(actor=request.user, recipient=post.author, verb='comment', target=comment)
+#     return redirect('social:post_detail', pk=post.id)
 
 @login_required
 def comment_delete(request, comment_id):
