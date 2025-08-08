@@ -43,12 +43,15 @@ def post_edit(request, pk):
 def post_list(request):
 
     posts = Post.objects.select_related('author').prefetch_related('comments', 'likes')
+    query = ''
+    filter_type = ''
+    sort_by = ''
+
 
     if request.user.is_authenticated:
         query = request.GET.get('q', '')
         filter_type = request.GET.get('filter')
         sort_by = request.GET.get('sort', '-created_at')
-        sort_key = request.GET.get('sort', 'date_new')
 
         if filter_type == 'following':
             posts = posts.filter(author__in=request.user.following.all())
@@ -64,7 +67,7 @@ def post_list(request):
                 Q(author__username__icontains=query)
             )
     else:
-        sort_key = request.GET.get('sort', 'date_new')
+        sort_by = request.GET.get('sort', '-created_at')
 
     allowed_sorts = {
         'date_new': '-created_at',
@@ -72,7 +75,8 @@ def post_list(request):
         'likes': '-likes_count',
         'comments': '-comments_count',
     }
-    sort_by = allowed_sorts.get(sort_by, '-created_at')
+    if sort_by not in allowed_sorts.values():
+        sort_by = '-created_at'
 
     if 'likes_count' in sort_by or 'comments_count' in sort_by:
         posts = posts.annotate(
@@ -84,7 +88,12 @@ def post_list(request):
     paginator = Paginator(posts, 10)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'social/post_list.html', {'page_obj': page_obj})
+    return render(request, 'social/post_list.html', {
+        'page_obj': page_obj,
+        'query': query,
+        'filter_type': filter_type,
+        'sort_by': sort_by
+    })
 
 
 @login_required
