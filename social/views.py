@@ -2,7 +2,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
-from django.db.models import Q
+from django.db.models import Q, Count
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.urls import reverse
@@ -41,9 +41,15 @@ def post_edit(request, pk):
 
 #@login_required
 def post_list(request):
+
     posts = Post.objects.select_related('author').prefetch_related('comments', 'likes')
+
     if request.user.is_authenticated:
+        query = request.GET.get('q', '')
         filter_type = request.GET.get('filter')
+        sort_by = request.GET.get('sort', '-created_at')
+        sort_key = request.GET.get('sort', 'date_new')
+
         if filter_type == 'following':
             posts = posts.filter(author__in=request.user.following.all())
         elif filter_type == 'not_following':
@@ -51,7 +57,30 @@ def post_list(request):
         elif filter_type == 'followers':
             posts = posts.filter(author__in=request.user.followers.all())
 
-    posts = posts.order_by('-created_at')
+        if query:
+            posts = posts.filter(
+                Q(title__icontains=query) |
+                Q(content__icontains=query) |
+                Q(author__username__icontains=query)
+            )
+    else:
+        sort_key = request.GET.get('sort', 'date_new')
+
+    allowed_sorts = {
+        'date_new': '-created_at',
+        'date_old': 'created_at',
+        'likes': '-likes_count',
+        'comments': '-comments_count',
+    }
+    sort_by = allowed_sorts.get(sort_by, '-created_at')
+
+    if 'likes_count' in sort_by or 'comments_count' in sort_by:
+        posts = posts.annotate(
+            comments_count=Count('comments', distinct=True),
+            likes_count=Count('likes', distinct=True)
+        )
+
+    posts = posts.order_by(sort_by)
     paginator = Paginator(posts, 10)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)

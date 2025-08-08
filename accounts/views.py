@@ -1,4 +1,4 @@
-#accounts/views.py
+# accounts/views.py
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import login, logout, get_user_model, update_session_auth_hash
@@ -7,6 +7,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
 from django.core.paginator import Paginator
+from django.db.models import Q
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.template.loader import render_to_string
@@ -93,11 +94,21 @@ User = get_user_model()
 
 
 def user_list(request):
+    query = request.GET.get('q', '')
     users = User.objects.filter(is_active=True).order_by('username')
+
+    if query:
+        users = users.filter(
+            Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+        )
     paginator = Paginator(users, 10)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    return render(request, 'accounts/user_list.html', {'page_obj': page_obj})
+    return render(
+        request,
+        'accounts/user_list.html',
+        {'page_obj': page_obj, 'query': query}
+    )
 
 
 def public_profile(request, username):

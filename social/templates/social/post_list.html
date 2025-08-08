@@ -6,14 +6,36 @@
         <h3 class="mb-4">Лента постов</h3>
         {% if user|can_interact %}
             <a href="{% url 'social:post_create' %}" class="btn btn-primary mb-3">Создать пост</a>
-        {% endif %}
-        <div class="mb-3">
-            <a href="?filter=all" class="btn btn-sm btn-outline-secondary">Все</a>
-            <a href="?filter=following" class="btn btn-sm btn-outline-primary">Только подписки</a>
-            <a href="?filter=not_following" class="btn btn-sm btn-outline-warning">Кого не читаю</a>
-            <a href="?filter=followers" class="btn btn-sm btn-outline-success">Кто читает меня</a>
-        </div>
+            <form method="get" class="mb-3 d-flex" role="search">
+                <input type="hidden" name="filter" value="{{ filter_type }}">
+                <input type="hidden" name="sort" value="{{ sort_by }}">
+                <input type="text" name="q" value="{{ query }}" class="form-control me-2"
+                       placeholder="Поиск по постам...">
+                <button class="btn btn-outline-primary" type="submit">Поиск</button>
+            </form>
 
+            <div class="mb-3">
+                <a href="?filter=all&q={{ query }}&sort={{ sort_by }}" class="btn btn-sm btn-outline-secondary">Все</a>
+                <a href="?filter=following&q={{ query }}&sort={{ sort_by }}" class="btn btn-sm btn-outline-primary">Только
+                    подписки</a>
+                <a href="?filter=not_following&q={{ query }}&sort={{ sort_by }}" class="btn btn-sm btn-outline-warning">Кого
+                    не читаю</a>
+                <a href="?filter=followers&q={{ query }}&sort={{ sort_by }}" class="btn btn-sm btn-outline-success">Кто
+                    читает меня</a>
+            </div>
+
+            <div class="mb-3">
+                <span>Сортировка:</span>
+                <a href="?filter={{ filter_type }}&q={{ query }}&sort=-created_at"
+                   class="btn btn-sm btn-outline-secondary">Новые</a>
+                <a href="?filter={{ filter_type }}&q={{ query }}&sort=created_at"
+                   class="btn btn-sm btn-outline-secondary">Старые</a>
+                <a href="?filter={{ filter_type }}&q={{ query }}&sort=-likes_count"
+                   class="btn btn-sm btn-outline-secondary">По лайкам</a>
+                <a href="?filter={{ filter_type }}&q={{ query }}&sort=-comments_count"
+                   class="btn btn-sm btn-outline-secondary">По комментариям</a>
+            </div>
+        {% endif %}
         {% for post in page_obj %}
             <div id="post-{{ post.id }}" class="card mb-3">
                 <div class="card-header d-flex justify-content-between">

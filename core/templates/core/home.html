@@ -1,14 +1,49 @@
 {% extends 'base.html' %}
+{% load rights %}
 {% block content %}
-<div class="container mt-5 text-center">
-    <h1>Добро пожаловать в {{ main_title }}!</h1>
-    {% if user.is_authenticated %}
-        <p><a href="{% url 'accounts:profile' %}" class="btn btn-primary">Мой профиль</a></p>
-    {% else %}
-        <p>
-            <a href="{% url 'accounts:login' %}" class="btn btn-success me-2">Войти</a>
-            <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary">Регистрация</a>
-        </p>
-    {% endif %}
-</div>
+    <div class="container mt-5 text-center">
+        <h1>Добро пожаловать в {{ main_title }}!</h1>
+        <p class="lead">Это твоё место для общения, постов и общения с друзьями. Давай начнём!</p>
+        <h3 class="mt-5">Простая инструкция:</h3>
+        <div class="container mt-2 text-start col-md-6">
+
+            <ol class="list-group list-group-numbered">
+                <li class="list-group-item">Если ты новый, <strong>зарегистрируйся</strong> или <strong>войди</strong>
+                    через кнопку внизу.
+                </li>
+                <li class="list-group-item">Создай свой первый <strong>пост</strong> — нажми "Создать пост" и добавь
+                    текст или фото.
+                </li>
+                <li class="list-group-item">Найди друзей: переходи на профили и <strong>подписывайся</strong> на
+                    интересных людей.
+                </li>
+                <li class="list-group-item">Поставь <strong>лайк</strong> или оставь <strong>комментарий</strong> к
+                    постам — просто кликни на них.
+                </li>
+                <li class="list-group-item">Фильтруй ленту: используй кнопки "Все", "Только подписки", "Кого не читаю"
+                    или "Кто читает меня" для удобного просмотра.
+                </li>
+                <li class="list-group-item">Ищи контент: введи запрос в строке поиска и применяй фильтры для точных
+                    результатов.
+                </li>
+            </ol>
+
+            <p class="mt-4">Готов начать? Погнали! Если что-то непонятно, пиши в поддержку или проверяй
+                {% if user.is_authenticated %}
+                <a href="{% url 'accounts:profile' %}" class="text-primary">свой профиль</a>
+                {% else %}
+                свой профиль
+                {% endif %}
+                .</p>
+        </div>
+        {% if user.is_authenticated %}
+            <a href="{% url 'accounts:profile' %}" class="btn btn-primary">Мой профиль</a>
+        {% else %}
+            <p>
+                <a href="{% url 'accounts:login' %}" class="btn btn-success me-2">Войти</a>
+                <a href="{% url 'accounts:register' %}" class="btn btn-outline-primary">Регистрация</a>
+            </p>
+        {% endif %}
+    </div>
+
 {% endblock %}

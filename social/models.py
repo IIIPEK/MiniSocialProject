@@ -33,7 +33,11 @@ class Post(models.Model):
     def get_absolute_url(self):
         return f'/{self.id}/'
 
+    def comments_count(self):
+        return self.comments.count()
 
+    def likes_count(self):
+        return self.likes.count()
 
 class Comment(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
