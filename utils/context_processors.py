@@ -36,10 +36,10 @@ def menu_context(request):
                 {'title': 'Регистрация', 'url': reverse('accounts:register')},
             ]
         })
-    notifications = {'link': reverse('social:notification_list'), 'unread': 0}
+    notification = {'link': reverse('notifications:notification_list'), 'unread': 0}
     if request.user.is_authenticated and hasattr(request.user, 'notifications'):
         try:
-            notifications['unread'] = request.user.notifications.filter(is_read=False).count()
+            notification['unread'] = request.user.notifications.filter(is_read=False).count()
         except Exception:
-            notifications['unread'] = 0
-    return {'menu_items': menu,'main_title': settings.MAIN_TITLE,'year': datetime.now().year, 'notifications': notifications}
+            notification['unread'] = 0
+    return {'menu_items': menu,'main_title': settings.MAIN_TITLE,'year': datetime.now().year, 'notification': notification}

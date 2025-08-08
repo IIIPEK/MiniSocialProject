@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h2>Уведомления</h2>
+<a href="{% url 'notifications:mark_all_read' %}" class="btn btn-sm btn-outline-secondary mb-3">
+    Пометить всё как прочитанное
+</a>
+
+<ul class="list-group">
+{% for notif in notifications %}
+    <li class="list-group-item {% if not notif.is_read %}list-group-item-info{% endif %}">
+        <strong>{{ notif.actor.username }}</strong>
+        {% if notif.verb == 'like' %}
+            поставил лайк вашему посту
+        {% elif notif.verb == 'comment' %}
+            оставил комментарий
+        {% elif notif.verb == 'follow' %}
+            подписался на вас
+        {% endif %}
+        {% if notif.target %}
+            — <a href="{{ notif.target.get_absolute_url }}">перейти</a>
+        {% endif %}
+        <br><small class="text-muted">{{ notif.created_at|date:"d.m.Y H:i" }}</small>
+        {% if not notif.is_read %}
+            <a href="{% url 'notifications:mark_read' notif.pk %}" class="btn btn-sm btn-outline-primary ms-2">
+                Пометить как прочитанное
+            </a>
+        {% endif %}
+    </li>
+{% empty %}
+    <li class="list-group-item">Уведомлений нет</li>
+{% endfor %}
+</ul>
+{% endblock %}

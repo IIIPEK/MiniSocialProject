@@ -41,7 +41,7 @@
         <h3>Комментарии</h3>
 
         {% for comment in page_obj %}
-            <div class="mb-2 border p-3 rounded bg-light">
+            <div id="comment-{{ comment.id }}" class="mb-2 border p-3 rounded bg-light">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
                         <strong>{{ comment.author.username }}</strong> —

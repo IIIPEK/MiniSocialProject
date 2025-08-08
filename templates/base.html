@@ -17,10 +17,10 @@
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
             <span class="navbar-toggler-icon"></span>
         </button>
-        {% if notifications.unread > 0 %}
-            <button type="button" class="btn btn-outline-danger">
-                <i class="bi bi-bell-fill"></i> {{ notifications.unread }}
-            </button>
+        {% if notification.unread > 0 %}
+            <a href="{% url 'notifications:notification_list' %}" class="btn btn-outline-danger">
+                <i class="bi bi-bell-fill"></i> {{ notification.unread }}
+            </a>
         {% endif %}
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">

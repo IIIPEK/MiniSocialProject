@@ -30,6 +30,10 @@ class Post(models.Model):
         return f"{self.title} — {self.author.username}"
         # return f'{self.author.username}: {self.content[:30]}...'
 
+    def get_absolute_url(self):
+        return f'/{self.id}/'
+
+
 
 class Comment(models.Model):
     post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='comments')
@@ -42,6 +46,9 @@ class Comment(models.Model):
 
     def __str__(self):
         return f"Комментарий от {self.author or 'Аноним'} к посту {self.post_id}"
+
+    def get_absolute_url(self):
+        return f'/{self.post_id}/#comment-{self.id}'
 
 class Notification(models.Model):
     NOTIFICATION_TYPES = [
@@ -71,3 +78,4 @@ class Notification(models.Model):
 
     def __str__(self):
         return f'{self.actor} -> {self.recipient}: {self.verb}'
+

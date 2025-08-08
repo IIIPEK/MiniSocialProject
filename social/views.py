@@ -112,29 +112,6 @@ def post_like_toggle(request, pk):
 
     next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
     return redirect(next_url)
-    # post = get_object_or_404(Post, pk=pk)
-    # if request.user in post.likes.all():
-    #     post.likes.remove(request.user)
-    # else:
-    #     post.likes.add(request.user)
-    # next_url = request.POST.get('next') or request.META.get('HTTP_REFERER') or '/'
-    # return redirect(next_url)
-    # # return HttpResponseRedirect(reverse('social:post_detail', args=[pk]))
-
-# @login_required
-# def comment_add(request, post_id):
-#     post = get_object_or_404(Post, id=post_id)
-#     print(post)
-#     if request.method == 'POST':
-#         form = CommentForm(request.POST)
-#         if form.is_valid():
-#             comment = form.save(commit=False)
-#             comment.author = request.user
-#             comment.post = post
-#             comment.save()
-#             print(comment)
-#             create_notification(actor=request.user, recipient=post.author, verb='comment', target=comment)
-#     return redirect('social:post_detail', pk=post.id)
 
 @login_required
 def comment_delete(request, comment_id):
@@ -148,7 +125,7 @@ def comment_delete(request, comment_id):
     messages.success(request, "Комментарий удалён.")
     return redirect('social:post_detail', pk=comment.post.id)
 
-@login_required
-def notification_list(request):
-    notifications = request.user.notifications.all().order_by('-created_at')
-    return render(request, 'social/notifications.html', {'notifications': notifications})
+# @login_required
+# def notification_list(request):
+#     notifications = request.user.notifications.all().order_by('-created_at')
+#     return render(request, 'social/notification_list.html', {'notifications': notifications})
