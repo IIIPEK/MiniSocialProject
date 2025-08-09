@@ -7,28 +7,34 @@
 </a>
 
 <ul class="list-group">
-{% for notif in notifications %}
+    {% for notif in notifications %}
     <li class="list-group-item {% if not notif.is_read %}list-group-item-info{% endif %}">
-        <strong>{{ notif.actor.username }}</strong>
-        {% if notif.verb == 'like' %}
-            поставил лайк вашему посту
-        {% elif notif.verb == 'comment' %}
-            оставил комментарий
-        {% elif notif.verb == 'follow' %}
-            подписался на вас
-        {% endif %}
-        {% if notif.target %}
-            — <a href="{{ notif.target.get_absolute_url }}">перейти</a>
-        {% endif %}
-        <br><small class="text-muted">{{ notif.created_at|date:"d.m.Y H:i" }}</small>
-        {% if not notif.is_read %}
-            <a href="{% url 'notifications:mark_read' notif.pk %}" class="btn btn-sm btn-outline-primary ms-2">
-                Пометить как прочитанное
-            </a>
-        {% endif %}
+        <div class="text-muted d-flex flex-column flex-sm-row justify-content-between gap-2">
+            <div>
+                <a href="{% url 'accounts:public_profile' notif.actor.nickname %}"><strong>{{ notif.actor.nickname }}</strong></a>
+                {% if notif.verb == 'like' %}
+                поставил лайк вашему посту
+                {% elif notif.verb == 'comment' %}
+                оставил комментарий
+                {% elif notif.verb == 'follow' %}
+                подписался на вас
+                {% endif %}
+                {% if notif.target %}
+                — <a href="{{ notif.target.get_absolute_url }}">перейти</a>
+                {% endif %}
+            </div>
+            <div>
+                <small class="text-muted">{{ notif.created_at|date:"d.m.Y H:i" }}</small>
+                {% if not notif.is_read %}
+                <a href="{% url 'notifications:mark_read' notif.pk %}" class="btn btn-sm btn-outline-primary ms-2">
+                    Пометить как прочитанное
+                </a>
+                {% endif %}
+            </div>
+        </div>
     </li>
-{% empty %}
+    {% empty %}
     <li class="list-group-item">Уведомлений нет</li>
-{% endfor %}
+    {% endfor %}
 </ul>
 {% endblock %}

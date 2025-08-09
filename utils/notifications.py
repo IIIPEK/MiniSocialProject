@@ -14,13 +14,13 @@ def create_notification(actor, recipient, verb, target=None):
     """
     if not recipient or actor == recipient:
         return  # Не уведомляем самого себя
-    print(actor, recipient, verb, target)
+
     content_type = None
     object_id = None
     if target is not None:
         content_type = ContentType.objects.get_for_model(target)
         object_id = getattr(target, 'pk', None)
-
+    print(actor.id, recipient.id, verb, target)
     if verb == 'like' and content_type and object_id is not None:
         existing = Notification.objects.filter(
             actor=actor,
@@ -37,12 +37,12 @@ def create_notification(actor, recipient, verb, target=None):
                 existing.created_at = timezone.now()
                 existing.save(update_fields=['is_read', 'created_at'])
             return existing  # не создаём новый
-
-        # Создаём новое уведомление
-        with transaction.atomic():
-            notification = Notification(actor=actor, recipient=recipient, verb=verb)
-            if target is not None:
-                notification.content_type = content_type
-                notification.object_id = object_id
-            notification.save()
-        return notification
+    # Создаём новое уведомление
+    with transaction.atomic():
+        print(actor.id, recipient.id, verb, target)
+        notification = Notification(actor=actor, recipient=recipient, verb=verb)
+        if target is not None:
+            notification.content_type = content_type
+            notification.object_id = object_id
+        notification.save()
+    return notification

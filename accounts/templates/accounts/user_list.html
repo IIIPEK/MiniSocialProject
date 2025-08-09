@@ -11,12 +11,12 @@
         <ul class="list-group">
             {% for user in page_obj %}
                 <li class="list-group-item d-flex flex-column flex-sm-row justify-content-between gap-2">
-                    <a href="{% url 'accounts:public_profile' user.username %}">{{ user.username }}</a>
+                    <a href="{% url 'accounts:public_profile' user.nickname %}">{{ user.nickname }}</a>
                     {% if user.first_name or user.last_name %}
                         <span>{{ user.first_name }} {{ user.last_name }}</span>
                     {% endif %}
                     {% if request.user.is_authenticated and request.user != user %}
-                        <form action="{% url 'accounts:toggle_follow' user.username %}"
+                        <form action="{% url 'accounts:toggle_follow' user.nickname %}"
                               method="post"
                               class="ajax-follow-toggle d-inline">
                             {% csrf_token %}

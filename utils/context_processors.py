@@ -24,7 +24,7 @@ def menu_context(request):
         profile_submenu.append({'title': 'Выход', 'url': reverse('accounts:logout')})
 
         menu.append({
-            'title': f'Профиль ({request.user.username})',
+            'title': f'Профиль ({request.user.nickname})',
             'submenu': profile_submenu
         })
 

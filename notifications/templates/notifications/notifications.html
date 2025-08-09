@@ -41,7 +41,7 @@
                     <div>
                         {% if post.author %}
                             Автор:
-                            <a href="{% url 'accounts:public_profile' post.author.username %}">{{ post.author.username }}</a>
+                            <a href="{% url 'accounts:public_profile' post.author.nickname %}">{{ post.author.nickname }}</a>
                         {% else %}
                             <span class="text-muted">Автор удалён</span>
                         {% endif %}

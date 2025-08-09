@@ -7,7 +7,7 @@ class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = [
-            'username', 'email', 'first_name', 'last_name',
+            'username', 'email', 'nickname','first_name', 'last_name',
             'avatar', 'date_of_birth', 'website',
             'telegram', 'whatsapp', 'viber',
             'password1', 'password2'
@@ -15,6 +15,7 @@ class CustomUserCreationForm(UserCreationForm):
         widgets = {
             'username': forms.TextInput(attrs={'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'nickname': forms.TextInput(attrs={'class': 'form-control'}),
             'first_name': forms.TextInput(attrs={'class': 'form-control'}),
             'last_name': forms.TextInput(attrs={'class': 'form-control'}),
             'avatar': forms.ClearableFileInput(attrs={'class': 'form-control'}),

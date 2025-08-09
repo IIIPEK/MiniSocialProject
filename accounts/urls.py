@@ -12,8 +12,8 @@ urlpatterns = [
     path('profile/edit/', views.profile_edit_view, name='profile_edit'),
     path('password/change/', views.password_change_view, name='password_change'),
     path('users/', views.user_list, name='user_list'),
-    path('users/<str:username>/', views.public_profile, name='public_profile'),
-    path('users/<str:username>/follow/', views.toggle_follow, name='toggle_follow'),
+    path('users/<str:nickname>/', views.public_profile, name='public_profile'),
+    path('users/<str:nickname>/follow/', views.toggle_follow, name='toggle_follow'),
     path('password_reset/',
          auth_views.PasswordResetView.as_view(
              template_name='accounts/password_reset_form.html',

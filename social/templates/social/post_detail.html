@@ -8,7 +8,7 @@
                 <strong>
                     {% if post.author %}
                         Автор:
-                        <a href="{% url 'accounts:public_profile' post.author.username %}">{{ post.author.username }}</a>
+                        <a href="{% url 'accounts:public_profile' post.author.nickname %}">{{ post.author.nickname }}</a>
                     {% else %}
                         <span class="text-muted">Автор удалён</span>
                     {% endif %}
@@ -44,7 +44,7 @@
             <div id="comment-{{ comment.id }}" class="mb-2 border p-3 rounded bg-light">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <strong>{{ comment.author.username }}</strong> —
+                        <strong>{{ comment.author.nickname }}</strong> —
                         <small>{{ comment.created_at|date:"d.m.Y H:i" }}</small>
                     </div>
                     {% if comment|can_delete_comment:user %}

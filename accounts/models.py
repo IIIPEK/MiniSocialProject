@@ -1,3 +1,5 @@
+# accounts/models.py
+
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -27,11 +29,12 @@ class CustomUser(AbstractUser):
         blank=True
     )
     is_email_confirmed = models.BooleanField(default=False)
+    nickname = models.CharField(max_length=50)
 
     REQUIRED_FIELDS = ['email']
 
     def __str__(self):
-        return self.username
+        return self.nickname
 
     def full_name(self):
         return f'{self.first_name} {self.last_name}'.strip()

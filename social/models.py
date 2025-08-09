@@ -30,7 +30,7 @@ class Post(models.Model):
         ordering = ['-created_at']
 
     def __str__(self):
-        return f"{self.title} — {self.author.username}"
+        return f"{self.title} — {self.author.nickname}"
         # return f'{self.author.username}: {self.content[:30]}...'
 
     def get_absolute_url(self):

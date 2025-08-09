@@ -7,10 +7,10 @@ from django.contrib.admin.sites import AlreadyRegistered
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'is_email_confirmed', 'is_verified')
+    list_display = ('username', 'email', 'nickname', 'first_name', 'last_name', 'is_staff', 'is_email_confirmed', 'is_verified')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'is_verified', 'is_email_confirmed')
 
-    fieldsets = UserAdmin.fieldsets + (
+    fieldsets = ((None, {'fields': ('username',  'nickname', 'password')}),) + UserAdmin.fieldsets[1:] + (
         ('Дополнительная информация', {
             'fields': (
                 'avatar',
@@ -55,7 +55,6 @@ class CustomUserAdmin(UserAdmin):
 
 # Авто-регистрация остальных моделей
 app = apps.get_app_config('accounts')
-
 for model in app.get_models():
     if model != CustomUser:
         try:

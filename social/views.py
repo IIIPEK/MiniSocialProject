@@ -64,7 +64,7 @@ def post_list(request):
             posts = posts.filter(
                 Q(title__icontains=query) |
                 Q(content__icontains=query) |
-                Q(author__username__icontains=query)
+                Q(author__nickname__icontains=query)
             )
     else:
         sort_by = request.GET.get('sort', '-created_at')

@@ -2,7 +2,7 @@
 {% load rights %}
 {% block content %}
     <div class="container">
-        <h2>{{ profile_user.username }}</h2>
+        <h2>{{ profile_user.nickname }}</h2>
         {% if profile_user.avatar %}
             <img src="{{ profile_user.avatar.url }}" alt="Avatar" class="img-thumbnail mb-2" style="max-width: 150px;">
         {% endif %}
@@ -15,7 +15,7 @@
             Подписок: {{ following_count }}
         </p>
         {% if user.is_authenticated and user != profile_user and user|can_interact %}
-            <form action="{% url 'accounts:toggle_follow' profile_user.username %}"
+            <form action="{% url 'accounts:toggle_follow' profile_user.nickname %}"
                   method="post"
                   class="ajax-follow-toggle ajax-follow-reload d-inline">
                 {% csrf_token %}
@@ -36,12 +36,12 @@
                     <ul class="list-group list-group-flush">
                         {% for follower in profile_user.followers.all %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{% url 'accounts:public_profile' follower.username %}">
-                                    {{ follower.username }}
+                                <a href="{% url 'accounts:public_profile' follower.nickname %}">
+                                    {{ follower.nickname }}
                                 </a>
 
                                 {% if user.is_authenticated and user != follower and follower not in user.following.all %}
-                                    <form action="{% url 'accounts:toggle_follow' follower.username %}"
+                                    <form action="{% url 'accounts:toggle_follow' follower.nickname %}"
                                           method="post"
                                           class="ajax-follow-toggle ajax-follow-reload d-inline">
                                         {% csrf_token %}
@@ -68,11 +68,11 @@
                     <ul class="list-group list-group-flush">
                         {% for following in profile_user.following.all %}
                             <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <a href="{% url 'accounts:public_profile' following.username %}">
-                                    {{ following.username }}
+                                <a href="{% url 'accounts:public_profile' following.nickname %}">
+                                    {{ following.nickname }}
                                 </a>
                                 {% if user.is_authenticated and user == profile_user %}
-                                    <form action="{% url 'accounts:toggle_follow' following.username %}"
+                                    <form action="{% url 'accounts:toggle_follow' following.nickname %}"
                                           method="post"
                                           class="ajax-follow-toggle ajax-follow-reload d-inline">
                                         {% csrf_token %}

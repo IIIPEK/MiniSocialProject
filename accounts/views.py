@@ -95,11 +95,11 @@ User = get_user_model()
 
 def user_list(request):
     query = request.GET.get('q', '')
-    users = User.objects.filter(is_active=True).order_by('username')
+    users = User.objects.filter(is_active=True).order_by('nickname')
 
     if query:
         users = users.filter(
-            Q(username__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
+            Q(nickname__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
         )
     paginator = Paginator(users, 10)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
@@ -111,8 +111,8 @@ def user_list(request):
     )
 
 
-def public_profile(request, username):
-    user_profile = get_object_or_404(User, username=username)
+def public_profile(request, nickname):
+    user_profile = get_object_or_404(User, nickname=nickname)
     posts = user_profile.posts.all()
     followers_count = user_profile.followers.count()
     following_count = user_profile.following.count()
@@ -126,12 +126,13 @@ def public_profile(request, username):
 
 @login_required
 @require_POST
-def toggle_follow(request, username):
-    if request.user.username == username:
+def toggle_follow(request, nickname):
+    if request.user.nickname == nickname:
         return JsonResponse({'success': False, 'error': 'Нельзя подписаться на самого себя.'})
 
     try:
-        target_user = get_object_or_404(CustomUser, username=username)
+        target_user = get_object_or_404(CustomUser, nickname=nickname)
+        print(f'Пользователь {target_user} найден. {request.user} {request.user.following.all()}')  # Добавляем эту строку для отладки (можно удалить, если не нужно)target_user)
     except:
         return JsonResponse({'success': False, 'error': 'Пользователь не найден.'})
 

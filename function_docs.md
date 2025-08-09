@@ -64,12 +64,12 @@
 
 ---
 
-#### `toggle_follow(request, username)`
+#### `toggle_follow(request, nickname)`
 **Purpose**: Handle follow/unfollow functionality with AJAX support.
 
 **Parameters**: 
 - `request` (HttpRequest): The HTTP request object
-- `username` (str): Username of user to follow/unfollow
+- `nickname` (str): Nickname of user to follow/unfollow
 
 **Returns**: 
 - AJAX: JSON response with success status
@@ -134,7 +134,7 @@
 **Returns**: Rendered post list template with filtered posts
 
 **Query Parameters**:
-- `q`: Search query (searches title, content, author username)
+- `q`: Search query (searches title, content, author nickname)
 - `filter`: Filter type ('following', 'not_following', 'followers', 'all')
 - `sort`: Sort order ('-created_at', 'created_at', '-likes_count', '-comments_count')
 - `page`: Page number for pagination
