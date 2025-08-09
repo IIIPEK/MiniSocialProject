@@ -1,9 +1,12 @@
 #social/models.py
-from django.db import models
 from django.conf import settings
+from django.db import models
+from django.db.models import Q, UniqueConstraint
 
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+
+from social.managers import PostManager
 
 
 def post_image_path(instance, filename):
@@ -22,7 +25,7 @@ class Post(models.Model):
         related_name='liked_posts',
         blank=True
     )
-
+    objects = PostManager()
     class Meta:
         ordering = ['-created_at']
 
@@ -79,6 +82,15 @@ class Notification(models.Model):
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
     object_id = models.PositiveIntegerField(null=True, blank=True)
     target = GenericForeignKey('content_type', 'object_id')
+
+    class Meta:
+        constraints = [
+            UniqueConstraint(
+                fields=['actor', 'recipient', 'verb', 'content_type', 'object_id'],
+                condition=Q(verb='like'),
+                name='unique_like_notification'
+            ),
+        ]
 
     def __str__(self):
         return f'{self.actor} -> {self.recipient}: {self.verb}'

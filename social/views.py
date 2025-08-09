@@ -78,11 +78,11 @@ def post_list(request):
     if sort_by not in allowed_sorts.values():
         sort_by = '-created_at'
 
-    if 'likes_count' in sort_by or 'comments_count' in sort_by:
-        posts = posts.annotate(
-            comments_count=Count('comments', distinct=True),
-            likes_count=Count('likes', distinct=True)
-        )
+    # if 'likes_count' in sort_by or 'comments_count' in sort_by:
+    #     posts = posts.annotate(
+    #         comments_count=Count('comments', distinct=True),
+    #         likes_count=Count('likes', distinct=True)
+    #     )
 
     posts = posts.order_by(sort_by)
     paginator = Paginator(posts, 10)  # по 10 пользователей на страницу
