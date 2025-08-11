@@ -29,7 +29,7 @@ class CustomUser(AbstractUser):
         blank=True
     )
     is_email_confirmed = models.BooleanField(default=False)
-    nickname = models.CharField(max_length=50)
+    nickname = models.CharField(max_length=50, unique=True)
 
     REQUIRED_FIELDS = ['email']
 
