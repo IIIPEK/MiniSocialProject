@@ -15,6 +15,10 @@
             Подписок: {{ following_count }}
         </p>
         {% if user.is_authenticated and user != profile_user and user|can_interact %}
+            <a href="{% url 'messaging:start_thread' user.nickname %}" class="btn btn-sm btn-outline-secondary"
+               title="Написать сообщение">
+                <i class="bi bi-envelope"></i>
+            </a>
             <form action="{% url 'accounts:toggle_follow' profile_user.nickname %}"
                   method="post"
                   class="ajax-follow-toggle ajax-follow-reload d-inline">

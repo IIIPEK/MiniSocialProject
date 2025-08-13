@@ -1,0 +1,3 @@
+{% for message in messages_qs %}
+    {% include 'messaging/includes/message_item.html' with message=message %}
+{% endfor %}

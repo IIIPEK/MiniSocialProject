@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'utils',
     'social',
     'notifications',
+    'messaging'
 ]
 
 MIDDLEWARE = [
@@ -152,3 +153,7 @@ MAIN_TITLE = os.getenv('MAIN_TITLE')
 COMMENT_DELETE_DAYS = 7
 POST_DELETE_DAYS = 30
 POST_EDIT_DAYS = 7
+
+# Интервал автообновления чата в миллисекундах
+CHAT_REFRESH_INTERVAL = 5000  # 5 секунд
+POSTS_PER_PAGE = 10

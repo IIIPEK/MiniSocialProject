@@ -1,5 +1,5 @@
 # accounts/models.py
-
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 
@@ -49,27 +49,18 @@ class CustomUser(AbstractUser):
         return self.is_active and self.is_email_confirmed
 
 
-# views.py
-from django.utils.http import urlsafe_base64_decode
-from django.contrib.auth.tokens import default_token_generator
-from django.contrib.auth import get_user_model
-from django.shortcuts import redirect, render
-from django.contrib import messages
 
-User = get_user_model()
+class UserSetting(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="settings"
+    )
+    name = models.CharField(max_length=100)
+    value = models.CharField(max_length=255, blank=True, null=True)
 
-def confirm_email(request, uidb64, token):
-    try:
-        uid = urlsafe_base64_decode(uidb64).decode()
-        user = User.objects.get(pk=uid)
-    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
-        user = None
+    class Meta:
+        unique_together = ('user', 'name')
 
-    if user and default_token_generator.check_token(user, token):
-        user.is_email_confirmed = True
-        user.save()
-        messages.success(request, 'Email подтвержден. Теперь вы можете пользоваться всеми функциями.')
-    else:
-        messages.error(request, 'Ссылка подтверждения недействительна или устарела.')
-
-    return redirect('accounts:login')
+    def __str__(self):
+        return f"{self.user.username} - {self.name} = {self.value}"
