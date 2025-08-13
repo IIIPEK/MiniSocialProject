@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Мои чаты{% endblock %}
+{% block content %}
+<div class="container mt-4">
+    <h3>Мои чаты</h3>
+    <ul class="list-group">
+        {% for thread in threads %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    {% for p in thread.participants.all %}
+                        {% if p != user %}
+                            {{ p.nickname }}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <a href="{% url 'messaging:thread_detail' thread.pk %}" class="btn btn-sm btn-outline-primary">
+                    Открыть
+                </a>
+            </li>
+        {% empty %}
+            <li class="list-group-item">Нет активных чатов</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}

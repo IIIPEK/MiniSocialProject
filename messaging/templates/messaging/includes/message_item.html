@@ -1,0 +1,4 @@
+<div class="mb-2 {% if message.sender == user %}text-end{% endif %}">
+    <strong>{{ message.sender.nickname }}</strong>: {{ message.content }}
+    <div class="text-muted small">{{ message.created_at|date:"H:i" }}</div>
+</div>

@@ -90,8 +90,6 @@ def password_change_view(request):
     return render(request, 'accounts/password_change.html', {'form': form})
 
 
-User = get_user_model()
-
 
 def user_list(request):
     query = request.GET.get('q', '')

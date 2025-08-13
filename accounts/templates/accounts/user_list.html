@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load rights %}
 {% block content %}
     <div class="container mt-4">
         <h2>Пользователи</h2>
@@ -15,19 +16,29 @@
                     {% if user.first_name or user.last_name %}
                         <span>{{ user.first_name }} {{ user.last_name }}</span>
                     {% endif %}
-                    {% if request.user.is_authenticated and request.user != user %}
-                        <form action="{% url 'accounts:toggle_follow' user.nickname %}"
-                              method="post"
-                              class="ajax-follow-toggle d-inline">
-                            {% csrf_token %}
-                            <button type="submit"
-                                    class="btn btn-sm {% if user in request.user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
-                                {% if user in request.user.following.all %}Отписаться{% else %}Подписаться{% endif %}
-                            </button>
-                        </form>
-                    {% else %}
-                        <div>Ваш профиль</div>
-                    {% endif %}
+                    <div>
+                        {% if request.user.is_authenticated and request.user != user %}
+                            <form action="{% url 'accounts:toggle_follow' user.nickname %}"
+                                  method="post"
+                                  class="ajax-follow-toggle d-inline">
+                                {% csrf_token %}
+                                <button type="submit"
+                                        class="btn btn-sm {% if user in request.user.following.all %}btn-primary{% else %}btn-outline-primary{% endif %}">
+                                    {% if user in request.user.following.all %}Отписаться{% else %}
+                                        Подписаться{% endif %}
+                                </button>
+                            </form>
+                            {% if user|can_interact %}
+                                <a href="{% url 'messaging:start_thread' user.nickname %}"
+                                   class="btn btn-sm btn-outline-secondary" title="Написать сообщение">
+                                    <i class="bi bi-envelope"></i>
+                                </a>
+                            {% endif %}
+
+                        {% else %}
+                            <div>Ваш профиль</div>
+                        {% endif %}
+                    </div>
                 </li>
             {% empty %}
                 <li class="list-group-item">Нет пользователей.</li>
