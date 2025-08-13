@@ -35,5 +35,6 @@ urlpatterns = [
          name='password_reset_complete'),
     path('confirm-email/<uidb64>/<token>/', views.confirm_email, name='confirm_email'),
     path('resend_activation/', views.resend_activation_email, name='resend_activation'),
+    path('settings/', views.edit_user_settings, name='edit_user_settings'),
 
 ]

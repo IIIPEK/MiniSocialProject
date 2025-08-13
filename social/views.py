@@ -11,6 +11,7 @@ from django.utils import timezone
 from .forms import PostForm, CommentForm
 from .models import Post,  Comment
 
+from utils.settings import get_user_settings
 from utils.notifications import create_notification
 from utils.templatetags.rights import can_edit_post, can_delete_comment, can_delete_post
 
@@ -85,7 +86,8 @@ def post_list(request):
     #     )
 
     posts = posts.order_by(sort_by)
-    paginator = Paginator(posts, 10)  # по 10 пользователей на страницу
+    posts_per_page = get_user_settings( ['POSTS_PER_PAGE'],request.user).get('POSTS_PER_PAGE', 10)
+    paginator = Paginator(posts, posts_per_page)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(request, 'social/post_list.html', {
@@ -101,7 +103,8 @@ def post_detail(request, pk):
     post = get_object_or_404(Post, pk=pk)
     comments = post.comments.select_related('author')
     form = CommentForm(request.POST or None)
-    paginator = Paginator(comments, 10)  # по 10 пользователей на страницу
+    posts_per_page = get_user_settings(['POSTS_PER_PAGE'], request.user).get('POSTS_PER_PAGE', 10)
+    paginator = Paginator(comments, posts_per_page)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     if request.method == 'POST' and form.is_valid():

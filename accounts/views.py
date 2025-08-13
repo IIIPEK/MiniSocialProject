@@ -17,11 +17,12 @@ from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.views.decorators.http import require_POST
 
 from .forms import CustomUserCreationForm
-from .forms import ProfileUpdateForm, CustomPasswordChangeForm
-from .models import CustomUser
+from .forms import ProfileUpdateForm, CustomPasswordChangeForm, MultipleUserSettingsForm
+from .models import CustomUser, UserSetting
 from social.models import Post
 from utils.notifications import create_notification
 from utils.templatetags.rights import can_edit_post
+from utils.settings import get_user_settings
 
 User = get_user_model()
 
@@ -99,7 +100,8 @@ def user_list(request):
         users = users.filter(
             Q(nickname__icontains=query) | Q(first_name__icontains=query) | Q(last_name__icontains=query)
         )
-    paginator = Paginator(users, 10)  # по 10 пользователей на страницу
+    posts_per_page = get_user_settings(['POSTS_PER_PAGE'], request.user).get('POSTS_PER_PAGE', 10)
+    paginator = Paginator(users, posts_per_page)  # по 10 пользователей на страницу
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
     return render(
@@ -185,3 +187,19 @@ def resend_activation_email(request):
     send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
     messages.success(request, 'Письмо с подтверждением отправлено на вашу почту.')
     return redirect('accounts:profile')
+
+@login_required
+def edit_user_settings(request):
+    current_values = get_user_settings(['CHAT_REFRESH_INTERVAL', 'POSTS_PER_PAGE'], request.user)
+    if request.method == 'POST':
+        form = MultipleUserSettingsForm(request.POST)
+        if form.is_valid():
+            form.save(request.user)
+            messages.success(request, "Настройки сохранены")
+            return redirect('accounts:edit_user_settings')
+    else:
+        form = MultipleUserSettingsForm(initial={
+            'chat_refresh_interval': current_values['CHAT_REFRESH_INTERVAL'],
+            'posts_per_page': current_values['POSTS_PER_PAGE'],
+        })
+    return render(request, 'accounts/edit_user_settings.html', {'form': form})

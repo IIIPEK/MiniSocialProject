@@ -11,10 +11,12 @@ def menu_context(request):
     ]
 
     if request.user.is_authenticated:
+        menu.append({'title': 'Мессенджер', 'url': reverse('messaging:thread_list')})
         profile_submenu = [
             {'title': 'Профиль', 'url': reverse('accounts:profile')},
             {'title': 'Редактировать', 'url': reverse('accounts:profile_edit')},
             {'title': 'Сменить пароль', 'url': reverse('accounts:password_change')},
+            {'title': 'Настройки', 'url': reverse('accounts:edit_user_settings')},
         ]
 
         # 👇 Добавим ссылку на админку для суперпользователей

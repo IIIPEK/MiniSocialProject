@@ -22,8 +22,8 @@ def thread_list(request):
 @login_required
 def thread_detail(request, pk):
     thread = get_object_or_404(Thread, pk=pk, participants=request.user)
-    print(request.headers.get('x-requested-with'), request.GET.get('ajax'))
-
+    # print(request.headers.get('x-requested-with'), request.GET.get('ajax'))
+    participants = thread.participants.all()
     form = MessageForm(request.POST or None)
     if request.method == "POST" and form.is_valid():
         if not can_interact(request.user):
@@ -50,6 +50,7 @@ def thread_detail(request, pk):
         "messages_qs": messages_qs,
         "form": form,
         'refresh_interval': get_user_settings('CHAT_REFRESH_INTERVAL'),
+        'participants': participants,
     })
 
 

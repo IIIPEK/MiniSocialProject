@@ -1,7 +1,7 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.forms import PasswordChangeForm
-from .models import CustomUser
+from django.contrib.auth.forms import UserCreationForm,PasswordChangeForm
+
+from .models import CustomUser, UserSetting
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
@@ -68,3 +68,37 @@ class CustomPasswordChangeForm(PasswordChangeForm):
                 'class': 'form-control',
                 'placeholder': field.label
             })
+
+
+class UserSettingsForm(forms.ModelForm):
+    class Meta:
+        model = UserSetting
+        fields = ['name', 'value']
+        widgets = {
+            'name': forms.HiddenInput(),  # имя параметра мы не даем менять
+        }
+
+# Если хотим редактировать несколько настроек за раз
+class MultipleUserSettingsForm(forms.Form):
+    chat_refresh_interval = forms.IntegerField(
+        label="Интервал обновления чата (мс)",
+        min_value=1000,
+        max_value=60000,
+        step_size=1000,
+    )
+    posts_per_page = forms.IntegerField(
+        label="Количество постов на странице",
+        min_value=5,
+        max_value=100,
+    )
+
+    def save(self, user):
+        from .models import UserSetting
+        settings_map = {
+            'CHAT_REFRESH_INTERVAL': self.cleaned_data['chat_refresh_interval'],
+            'POSTS_PER_PAGE': self.cleaned_data['posts_per_page'],
+        }
+        for name, value in settings_map.items():
+            UserSetting.objects.update_or_create(
+                user=user, name=name, defaults={'value': str(value)}
+            )

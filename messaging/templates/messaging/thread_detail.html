@@ -2,6 +2,19 @@
 {% block content %}
     <div class="container mt-4" id="chat-container">
         <h4>Чат</h4>
+        <div>
+            <hr>
+            <strong>Участники:</strong>
+            {% for participant in participants %}
+                <a href="{% url 'accounts:public_profile' participant.nickname %}"
+                   class="badge bg-secondary text-decoration-none">
+                    {{ participant.nickname }}
+                </a>
+            {% empty %}
+                <span class="text-muted">Нет участников</span>
+            {% endfor %}
+            <hr>
+        </div>
         <div id="messages-container">
             {% include 'messaging/includes/message_list.html' with messages_qs=messages_qs %}
         </div>
@@ -13,29 +26,6 @@
         </form>
     </div>
 
-{#    <script>#}
-{#        document.addEventListener('DOMContentLoaded', function () {#}
-{#            const form = document.getElementById('message-form');#}
-{#            const container = document.getElementById('messages-container');#}
-{##}
-{#            form.addEventListener('submit', function (e) {#}
-{#                e.preventDefault();#}
-{#                const formData = new FormData(form);#}
-{##}
-{#                fetch(window.location.href, {#}
-{#                    method: 'POST',#}
-{#                    headers: {'X-Requested-With': 'XMLHttpRequest'},#}
-{#                    body: formData#}
-{#                })#}
-{#                    .then(response => response.json())#}
-{#                    .then(data => {#}
-{#                        container.insertAdjacentHTML('beforeend', data.html);#}
-{#                        form.reset();#}
-{#                        container.scrollTop = container.scrollHeight;#}
-{#                    });#}
-{#            });#}
-{#        });#}
-{#    </script>#}
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const form = document.getElementById('message-form');
