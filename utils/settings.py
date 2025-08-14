@@ -23,12 +23,17 @@ from django.conf import settings as dj_settings
 def get_user_settings(params, user=None):
     def _cast_value(value):
         """Преобразует строку в int/float/bool, если возможно."""
-        print(f"Type:{type(value)}, Value:{value}")
         if isinstance(value, str):
-            if value.isdigit():
+            v = value.strip().lower()
+            truthy = ('true', '1', 'yes', 'y', 'on')
+            falsy = ('false', '0', 'no', 'n', 'off')
+
+            if v in truthy:
                 return int(value)
-            if value.lower() in ('true', 'false'):
-                return value.lower() == 'true'
+            if v in falsy:
+                return False
+            if v.isdigit():
+                return int(v)
             try:
                 return float(value)
             except ValueError:
@@ -46,8 +51,8 @@ def get_user_settings(params, user=None):
 
 
     if isinstance(params, str):
-        return _get_param(params)
+        return _get_param(params.upper())
     elif isinstance(params, (list, tuple)):
-        return {param: _get_param(param) for param in params}
+        return {param.upper(): _get_param(param.upper()) for param in params}
     else:
         raise TypeError("params должен быть строкой или списком строк")
