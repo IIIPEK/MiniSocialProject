@@ -1,7 +1,9 @@
+# utils/templatetags/rights.py
 from django import template
 from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
+from accounts.models import UserDepartmentRight, Right, Department
 
 register = template.Library()
 
@@ -55,3 +57,15 @@ def get_interaction_restriction_reason(user):
     if not getattr(user, 'is_email_confirmed', False):
         return "Требуется подтверждение email."
     return ""
+
+@register.filter
+def has_right(user, dept_code_right):
+    try:
+        dept_code, right_code = dept_code_right.split(":")
+        return UserDepartmentRight.objects.filter(
+            user=user,
+            department__code=dept_code,
+            right__name__iexact=right_code
+        ).exists()
+    except:
+        return False
