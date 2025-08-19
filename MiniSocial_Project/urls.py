@@ -27,6 +27,7 @@ urlpatterns = [
     path('', include('social.urls'), name='social'),
     path('notifications/', include('notifications.urls'), name='notifications'),
     path('messaging/', include('messaging.urls'), name='messaging'),
+    path('requests/', include('requests.urls'), name='requests'),
 ]
 
 if settings.DEBUG:

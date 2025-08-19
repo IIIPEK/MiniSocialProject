@@ -84,7 +84,7 @@ class CustomUserAdmin(UserAdmin):
         if obj and obj.has_corporate_access:
             inlines.extend([UserCorporateProfileInline, UserDepartmentRightInline])
         elif obj:
-            # Для обычных пользователей показываем возможность создать корп. профиль
+            # Для обычных пользователей показываем возможность создать корп.профиль
             inlines.append(UserCorporateProfileInline)
 
         return inlines

@@ -46,7 +46,8 @@ INSTALLED_APPS = [
     'utils',
     'social',
     'notifications',
-    'messaging'
+    'messaging',
+    'requests',
 ]
 
 MIDDLEWARE = [
