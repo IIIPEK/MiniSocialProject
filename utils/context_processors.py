@@ -8,6 +8,7 @@ def menu_context(request):
         {'title': 'Главная', 'url': reverse('core:home')},
         {'title': 'Пользователи', 'url': reverse('accounts:user_list')},
         {'title': 'Лента', 'url': reverse('social:post_list')},
+        {'title': 'Заявки', 'url': reverse('requests:request_list')},
     ]
 
     if request.user.is_authenticated:
