@@ -2,14 +2,19 @@ from datetime import datetime
 from django.urls import reverse
 from django.conf import settings
 
+from utils.templatetags.rights import has_any_right
+from accounts.models import UserDepartmentRight
 
 def menu_context(request):
     menu = [
         {'title': 'Главная', 'url': reverse('core:home')},
         {'title': 'Пользователи', 'url': reverse('accounts:user_list')},
         {'title': 'Лента', 'url': reverse('social:post_list')},
-        {'title': 'Заявки', 'url': reverse('requests:request_list')},
     ]
+    # user_depts = UserDepartmentRight.objects.filter(user=request.user).values_list('department__code', flat=True).distinct()
+    # print(list(user_depts),request.user.username)
+    if has_any_right(request.user):
+        menu.append({'title': 'Заявки', 'url': reverse('requests:request_list')})
 
     if request.user.is_authenticated:
         menu.append({'title': 'Мессенджер', 'url': reverse('messaging:thread_list')})

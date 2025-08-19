@@ -18,7 +18,7 @@
             <h6 class="mt-4">Ваши права в отделе "{{ request_obj.department }}":</h6>
             <ul>
                 {% for ur in user_rights %}
-                    <li>{{ ur.right.name }}</li>
+                    <li>{{ ur.right.description }}</li>
                 {% endfor %}
             </ul>
         {% else %}
