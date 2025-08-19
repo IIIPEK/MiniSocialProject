@@ -2,7 +2,7 @@
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-
+from django.db.models.functions import Now
 
 def user_avatar_path(instance, filename):
     return f'avatars/user_{instance.id}/{filename}'
@@ -10,18 +10,18 @@ def user_avatar_path(instance, filename):
 
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
-    avatar = models.ImageField(upload_to=user_avatar_path, blank=True, null=True)
-    bio = models.TextField(blank=True)
-    status_message = models.CharField(max_length=100, blank=True, help_text='Девиз или настроение')
-    karma = models.IntegerField(default=0)
-    is_verified = models.BooleanField(default=False)
-    location = models.CharField(max_length=100, blank=True)
-    website = models.URLField(blank=True)
+    avatar = models.ImageField(upload_to=user_avatar_path, blank=True, null=True, db_default='')
+    bio = models.TextField(blank=True, db_default="")
+    status_message = models.CharField(max_length=100, blank=True, help_text='Девиз или настроение', db_default="")
+    karma = models.IntegerField(db_default=0)
+    is_verified = models.BooleanField(db_default=False)
+    location = models.CharField(max_length=100, blank=True,db_default="")
+    website = models.URLField(blank=True,db_default="")
     date_of_birth = models.DateField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    telegram = models.CharField(max_length=50, blank=True)
-    whatsapp = models.CharField(max_length=50, blank=True)
-    viber = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_default=Now())
+    telegram = models.CharField(max_length=50, blank=True, db_default="")
+    whatsapp = models.CharField(max_length=50, blank=True, db_default="")
+    viber = models.CharField(max_length=50, blank=True, db_default="")
     following = models.ManyToManyField(
         'self',
         symmetrical=False,
