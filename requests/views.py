@@ -80,6 +80,7 @@ def request_create_or_edit(request, pk=None):
             user=request.user,
             right__name__in=['Requester', 'Approver']
         ).exists()
+        print(has_right)
         if not has_right:
             return redirect('requests:request_list')
 

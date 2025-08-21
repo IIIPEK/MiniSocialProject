@@ -2,7 +2,7 @@
 from django.contrib.contenttypes.models import ContentType
 from django.db import IntegrityError, transaction
 
-from social.models import Notification
+from notifications.models import Notification
 def create_notification(actor, recipient, verb, target=None):
     """
     Создает уведомление.
@@ -20,7 +20,6 @@ def create_notification(actor, recipient, verb, target=None):
     if target is not None:
         content_type = ContentType.objects.get_for_model(target)
         object_id = getattr(target, 'pk', None)
-    print(actor.id, recipient.id, verb, target)
     if verb == 'like' and content_type and object_id is not None:
         existing = Notification.objects.filter(
             actor=actor,

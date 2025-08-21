@@ -1,7 +1,9 @@
 from django.db import models
 from accounts.models import CustomUser, Department
+from common.notify import notify_status_change
+from django.urls import reverse
 from django.utils import timezone
-from common.notify import notify_status_change  # Заглушка
+
 
 class RequestStatus(models.Model):
     code = models.CharField(max_length=20, unique=True)
@@ -35,6 +37,9 @@ class Request(models.Model):
     @property
     def total(self):
         return self.quantity * self.price
+
+    def get_absolute_url(self):
+        return reverse("requests:request_detail", args=[self.pk])
 
 
 class RequestStatusHistory(models.Model):
