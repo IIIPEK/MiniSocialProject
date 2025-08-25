@@ -83,7 +83,7 @@ def _build_request_url(req) -> str:
     return f"{base}{req.get_absolute_url()}" if base else req.get_absolute_url()
 
 
-def notify_status_change(request_obj, actor: CustomUser | None = None, request=none):
+def notify_status_change(request_obj, actor: CustomUser | None = None, request=None):
     """
     Письмо + site-уведомления по изменению статуса заявки.
     actor — кто поменял статус (если не передан, попытаемся угадать).
