@@ -155,6 +155,12 @@ COMMENT_DELETE_DAYS = 7
 POST_DELETE_DAYS = 30
 POST_EDIT_DAYS = 7
 
+ANYDB_UID=os.getenv('ANYDB_UID')
+ANYDB_PWD=os.getenv('ANYDB_PWD')
+ANYDB_SERVERNAME=os.getenv('ANYDB_SERVERNAME')
+ANYDB_DBN=os.getenv('ANYDB_DBN')
+ANYDB_HOST=os.getenv('ANYDB_HOST')
+
 # Интервал автообновления чата в миллисекундах
 CHAT_REFRESH_INTERVAL = 5000  # 5 секунд
 POSTS_PER_PAGE = 10
