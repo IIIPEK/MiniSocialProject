@@ -63,7 +63,6 @@ def menu_context(request):
             notification['unread'] = request.user.notifications.filter(is_read=False).count()
         except Exception:
             notification['unread'] = 0
-    print(settings.MAIN_TITLE)
 
     return {'menu_items': menu, 'main_title': settings.MAIN_TITLE, 'year': datetime.now().year,
             'notification': notification}
