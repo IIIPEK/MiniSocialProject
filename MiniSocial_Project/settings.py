@@ -10,9 +10,11 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import dj_database_url
+import os
+
 from pathlib import Path
 from django.urls import reverse_lazy
-import os
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -84,13 +86,24 @@ WSGI_APPLICATION = 'MiniSocial_Project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
+ENVIRONMENT = os.getenv("ENVIRONMENT", "dev").lower()
 
+DATABASE_URL = (
+    os.getenv(f"DATABASE_URL_{ENVIRONMENT.upper()}")
+    or os.getenv("DATABASE_URL_DEV")  # fallback на dev
+)
+
+DATABASES = {
+    "default": dj_database_url.parse(
+        DATABASE_URL or f"sqlite:///{BASE_DIR / 'db.sqlite3'}"
+    )
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
