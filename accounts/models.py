@@ -3,6 +3,7 @@ from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.db.models.functions import Now
+from django.utils import timezone
 
 def user_avatar_path(instance, filename):
     return f'avatars/user_{instance.id}/{filename}'
@@ -139,12 +140,26 @@ class UserCorporateProfile(models.Model):
     def __str__(self):
         return f"Corporate: {self.user.nickname} ({self.employee_id})"
 
+class Module(models.Model):
+    """Регистратор модулей проекта (неймспейс прав/ролей)"""
+    code = models.SlugField(max_length=50, unique=True)  # 'core', 'requests', 'budget', 'notifications', ...
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=255, blank=True)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(default=timezone.now, editable=False)
+
+    class Meta:
+        ordering = ["code"]
+
+    def __str__(self):
+        return f"{self.code} — {self.name}"
 
 class UserDepartmentRight(models.Model):
     """Права пользователя в департаментах"""
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     right = models.ForeignKey(Right, on_delete=models.CASCADE)
+    module = models.ForeignKey(Module, on_delete=models.PROTECT, related_name="user_department_rights")
 
     class Meta:
         unique_together = ('user', 'department', 'right')
