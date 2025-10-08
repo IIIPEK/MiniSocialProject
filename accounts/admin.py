@@ -4,7 +4,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, UserCorporateProfile, Department, Right,
     NotificationRole, UserDepartmentRight, DepartmentNotificationRecipient,
-    UserSetting
+    UserSetting, Module,
 )
 from django.apps import apps
 from django.contrib.admin.sites import AlreadyRegistered
@@ -122,10 +122,10 @@ class NotificationRoleAdmin(admin.ModelAdmin):
 
 @admin.register(UserDepartmentRight)
 class UserDepartmentRightAdmin(admin.ModelAdmin):
-    list_display = ('user', 'department', 'right')
-    list_filter = ('department', 'right')
-    search_fields = ('user__username', 'user__nickname', 'department__code', 'right__name')
-    autocomplete_fields = ['user', 'department', 'right']
+    list_display = ('user', 'department', 'right', 'module',)
+    list_filter = ('department', 'right', 'module',)
+    search_fields = ('user__username', 'user__nickname', 'department__code', 'right__name', 'module__name')
+    autocomplete_fields = ['user', 'department', 'right', 'module',]
 
 
 @admin.register(DepartmentNotificationRecipient)
@@ -150,3 +150,14 @@ class UserSettingAdmin(admin.ModelAdmin):
     list_filter = ('name',)
     search_fields = ('user__username', 'user__nickname', 'name')
     autocomplete_fields = ['user']
+
+@admin.register(Module)
+class ModuleAdmin(admin.ModelAdmin):
+    list_display = ("code", "name", "description", "is_active", "created_at")
+    list_filter = ("is_active",)
+    search_fields = ("code", "name", "description")
+    ordering = ("code",)
+
+    def has_delete_permission(self, request, obj=None):
+        # Запрет удаления модулей через админку
+        return False

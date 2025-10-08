@@ -5,6 +5,9 @@ from django.db import models
 from django.db.models.functions import Now
 from django.utils import timezone
 
+#from social.admin import model
+
+
 def user_avatar_path(instance, filename):
     return f'avatars/user_{instance.id}/{filename}'
 
@@ -108,9 +111,18 @@ class Department(models.Model):
 class Right(models.Model):
     name = models.CharField(max_length=50, unique=True)
     description = models.CharField(max_length=255, blank=True)
+    module = models.CharField(
+        max_length=32,
+        default="core",
+        db_index=True,
+        help_text="Логический модуль/домен: 'requests', 'budget', 'core' и т.п."
+    )
+
+    class Meta:
+        unique_together = ('module', 'name')
 
     def __str__(self):
-        return self.name
+        return f"{self.module}:{self.name}"
 
 
 class NotificationRole(models.Model):
@@ -152,20 +164,28 @@ class Module(models.Model):
         ordering = ["code"]
 
     def __str__(self):
-        return f"{self.code} — {self.name}"
+        return f"{self.code} — {self.name}/{self.description}"
 
 class UserDepartmentRight(models.Model):
     """Права пользователя в департаментах"""
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
     department = models.ForeignKey(Department, on_delete=models.CASCADE)
     right = models.ForeignKey(Right, on_delete=models.CASCADE)
-    module = models.ForeignKey(Module, on_delete=models.PROTECT, related_name="user_department_rights")
+    module = models.ForeignKey(
+        Module,
+        on_delete=models.PROTECT,
+        related_name="user_department_rights",
+    )
 
     class Meta:
-        unique_together = ('user', 'department', 'right')
+        unique_together = ('user', 'department', 'right', 'module')
+        indexes = [
+            models.Index(fields=['department', 'right', 'module']),
+            models.Index(fields=['user', 'module']),
+        ]
 
     def __str__(self):
-        return f"{self.user.nickname} / {self.department.code} / {self.right.name}"
+        return f"{self.user.nickname} / {self.department.code} / {self.right.name} @ {self.module}"
 
 
 class DepartmentNotificationRecipient(models.Model):
