@@ -116,58 +116,92 @@ def _notif_role_id_by_code(name: str) -> Optional[int]:
 #   ПУБЛИЧНЫЕ PY-ХЕЛПЕРЫ (для views и т.п.)
 # =============================
 
-def has_dept_right(user: CustomUser,
-                   department_or_code: Union[int, str, Department, None],
-                   right_code: str = "") -> bool:
-    """
-    Если right_code пуст -> достаточно любого права в департаменте.
-    Иначе -> проверяем наличие конкретного права (name сравниваем __iexact).
-    """
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
+# def has_dept_right(user: CustomUser,
+#                    department_or_code: Union[int, str, Department, None],
+#                    right_code: str = "") -> bool:
+#     """
+#     Если right_code пуст -> достаточно любого права в департаменте.
+#     Иначе -> проверяем наличие конкретного права (name сравниваем __iexact).
+#     """
+#     if not user or not getattr(user, "is_authenticated", False):
+#         return False
+#
+#     dep_id = _norm_dept_id(department_or_code)
+#     if dep_id is None:
+#         # Без департамента прав нет
+#         return False
+#
+#     qs = UserDepartmentRight.objects.filter(user_id=user.id, department_id=dep_id)
+#     if right_code:
+#         rid = _right_id_by_code(right_code)
+#         if not rid:
+#             return False
+#         qs = qs.filter(right_id=rid)
+#     return qs.exists()
+#
+# def has_any_dept_rights(user: CustomUser,
+#                         department_or_code: Union[int, str, Department, None],
+#                         right_codes: Iterable[str]) -> bool:
+#     if not user or not getattr(user, "is_authenticated", False):
+#         return False
+#     dep_id = _norm_dept_id(department_or_code)
+#     if dep_id is None:
+#         return False
+#     right_ids = [r for r in (_right_id_by_code(c) for c in right_codes) if r]
+#     if not right_ids:
+#         return False
+#     return UserDepartmentRight.objects.filter(
+#         user_id=user.id, department_id=dep_id, right_id__in=right_ids
+#     ).exists()
 
-    dep_id = _norm_dept_id(department_or_code)
-    if dep_id is None:
-        # Без департамента прав нет
-        return False
+# def has_notif_role(user: CustomUser,
+#                    department_or_code: Union[int, str, Department, None],
+#                    notif_role_code: str) -> bool:
+#     if not user or not getattr(user, "is_authenticated", False):
+#         return False
+#     dep_id = _norm_dept_id(department_or_code)
+#     if dep_id is None:
+#         return False
+#     nrid = _notif_role_id_by_code(notif_role_code)
+#     if not nrid:
+#         return False
+#     return DepartmentNotificationRecipient.objects.filter(
+#         department_id=dep_id, role_id=nrid, user_id=user.id
+#     ).exists()
 
-    qs = UserDepartmentRight.objects.filter(user_id=user.id, department_id=dep_id)
-    if right_code:
-        rid = _right_id_by_code(right_code)
-        if not rid:
-            return False
-        qs = qs.filter(right_id=rid)
-    return qs.exists()
-
-def has_any_dept_rights(user: CustomUser,
-                        department_or_code: Union[int, str, Department, None],
-                        right_codes: Iterable[str]) -> bool:
-    if not user or not getattr(user, "is_authenticated", False):
-        return False
-    dep_id = _norm_dept_id(department_or_code)
-    if dep_id is None:
-        return False
-    right_ids = [r for r in (_right_id_by_code(c) for c in right_codes) if r]
-    if not right_ids:
+# Новые функции обработки прав
+def has_dept_right(department_or_code, right_code: str, user, module: str = "requests") -> bool:
+    dept_id = _norm_dept_id(department_or_code)
+    if not dept_id or not getattr(user, "has_corporate_access", False):
         return False
     return UserDepartmentRight.objects.filter(
-        user_id=user.id, department_id=dep_id, right_id__in=right_ids
+        user_id=user.id,
+        department_id=dept_id,
+        right__name__iexact=right_code,
+        right__module__iexact=module,
     ).exists()
 
-def has_notif_role(user: CustomUser,
-                   department_or_code: Union[int, str, Department, None],
-                   notif_role_code: str) -> bool:
-    if not user or not getattr(user, "is_authenticated", False):
+def has_any_dept_rights(department_or_code, right_codes, user, module: str = "requests") -> bool:
+    dept_id = _norm_dept_id(department_or_code)
+    if not dept_id or not getattr(user, "has_corporate_access", False):
         return False
-    dep_id = _norm_dept_id(department_or_code)
-    if dep_id is None:
-        return False
-    nrid = _notif_role_id_by_code(notif_role_code)
-    if not nrid:
+    return UserDepartmentRight.objects.filter(
+        user_id=user.id,
+        department_id=dept_id,
+        right__module__iexact=module,
+        right__name__in=list(right_codes),
+    ).exists()
+
+def has_notif_role(department_or_code, role_code: str, user) -> bool:
+    dept_id = _norm_dept_id(department_or_code)
+    if not dept_id or not getattr(user, "has_corporate_access", False):
         return False
     return DepartmentNotificationRecipient.objects.filter(
-        department_id=dep_id, role_id=nrid, user_id=user.id
+        department_id=dept_id,
+        role__name__iexact=role_code,
+        user_id=user.id,
     ).exists()
+
 
 # =============================
 #    БИЗНЕС-ПРАВИЛА ДЛЯ ЗАЯВОК
@@ -189,14 +223,14 @@ EDITABLE_STATES = {"draft", "submitted"}  # автор/approver/po_manager мо�
 
 def can_create_request(department_or_code, user: CustomUser) -> bool:
     # Requester или PO_manager в департаменте
-    return has_any_dept_rights(user, department_or_code, ["Requester", "PO_manager"])
+    return has_any_dept_rights(department_or_code, ["Requester", "PO_manager"], user)
 
 def can_view_request(request_obj, user: CustomUser) -> bool:
     dep_id = dept_id_from_request(request_obj)
     if dep_id is None:
         return False
     # Viewer/Approver/Requester/PO_manager видят заявки департамента
-    if has_any_dept_rights(user, dep_id, ["Viewer", "Approver", "Requester", "PO_manager"]):
+    if has_any_dept_rights(dep_id, ["Viewer", "Approver", "Requester", "PO_manager"],user):
         return True
     # Автор всегда видит свою заявку
     author = getattr(request_obj, "created_by", None) or getattr(request_obj, "author", None)
@@ -218,9 +252,9 @@ def can_edit_request(request_obj, user: CustomUser) -> bool:
 
     if author == user and not is_final:
         return True
-    if has_dept_right(user, dep_id, "Approver") and not is_final:
+    if has_dept_right(dep_id, "Approver",user) and not is_final:
         return True
-    if has_dept_right(user, dep_id, "PO_manager") and not is_final:
+    if has_dept_right(dep_id, "PO_manager", user) and not is_final:
         return True
     return False
 
@@ -232,7 +266,7 @@ def can_approve_request(request_obj, user: CustomUser) -> bool:
     status = (getattr(request_obj, "status", None) or "").lower()
     if status in FINAL_STATES:
         return False
-    return has_dept_right(user, dep_id, "Approver")
+    return has_dept_right( dep_id, "Approver", user)
 
 def can_cancel_request(request_obj, user: CustomUser) -> bool:
     dep_id = dept_id_from_request(request_obj)
@@ -244,7 +278,7 @@ def can_cancel_request(request_obj, user: CustomUser) -> bool:
     author = getattr(request_obj, "created_by", None) or getattr(request_obj, "author", None)
     if author == user:
         return True
-    return has_dept_right(user, dep_id, "PO_manager")
+    return has_dept_right(dep_id, "PO_manager", user)
 
 def can_submit_po(request_obj, user: CustomUser) -> bool:
     dep_id = dept_id_from_request(request_obj)
@@ -254,12 +288,12 @@ def can_submit_po(request_obj, user: CustomUser) -> bool:
     status = (getattr(request_obj, "status", None) or "").lower()
     if status not in APPROVED_STATES:
         return False
-    return has_dept_right(user, dep_id, "PO_manager")
+    return has_dept_right(dep_id, "PO_manager", user)
 
 def can_notify_on_request_update(department_or_code, user: CustomUser) -> bool:
     # Любая из ролей-нотификаторов в департаменте
     for role in ("notifier", "notifier_rejected", "notifier_cancelled", "po_manager"):
-        if has_notif_role(user, department_or_code, role):
+        if has_notif_role(department_or_code, role, user):
             return True
     return False
 
@@ -269,15 +303,15 @@ def can_notify_on_request_update(department_or_code, user: CustomUser) -> bool:
 
 @register.simple_tag
 def has_right(department_or_code, user, right_code: str = "") -> bool:
-    return has_dept_right(user, department_or_code, right_code)
+    return has_dept_right(department_or_code, right_code, user)
 
 @register.simple_tag
 def has_any_rights(department_or_code, user, *right_codes) -> bool:
-    return has_any_dept_rights(user, department_or_code, right_codes)
+    return has_any_dept_rights(department_or_code, right_codes, user)
 
 @register.simple_tag
 def has_notif(department_or_code, user, role_code: str) -> bool:
-    return has_notif_role(user, department_or_code, role_code)
+    return has_notif_role(department_or_code, role_code, user)
 
 @register.simple_tag
 def can_create_request_tag(department_or_code, user) -> bool:
