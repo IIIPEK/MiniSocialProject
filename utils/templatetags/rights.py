@@ -1,13 +1,13 @@
 # utils/templatetags/rights.py
 from __future__ import annotations
 from functools import lru_cache
-from typing import Optional, Iterable, Union
+from typing import Optional, Iterable, Union, Sequence
 
 from django import template
-from django.db.models import Q
 from datetime import timedelta
 from django.conf import settings
 from django.utils import timezone
+from django.apps import apps
 
 from accounts.models import (
     CustomUser,
@@ -170,26 +170,43 @@ def _notif_role_id_by_code(name: str) -> Optional[int]:
 #     ).exists()
 
 # Новые функции обработки прав
-def has_dept_right(department_or_code, right_code: str, user, module: str = "requests") -> bool:
+def has_dept_right(department_or_code,
+                   right_code: str,
+                   user,
+                   module: str = "requests",
+                   **kwargs) -> bool:
     dept_id = _norm_dept_id(department_or_code)
     if not dept_id or not getattr(user, "has_corporate_access", False):
         return False
+    module_code = (module or "requests").lower()
+    if module_code == "finance":
+        return _has_finance_right(dept_id, right_code, user, **kwargs)
     return UserDepartmentRight.objects.filter(
         user_id=user.id,
         department_id=dept_id,
         right__name__iexact=right_code,
-        right__module__iexact=module,
+        right__module__iexact=module_code,
     ).exists()
 
-def has_any_dept_rights(department_or_code, right_codes, user, module: str = "requests") -> bool:
+def has_any_dept_rights(department_or_code,
+                        right_codes: Iterable[str],
+                        user,
+                        module: str = "requests",
+                        **kwargs) -> bool:
     dept_id = _norm_dept_id(department_or_code)
     if not dept_id or not getattr(user, "has_corporate_access", False):
+        return False
+    module_code = (module or "requests").lower()
+    if module_code == "finance":
+        return _has_finance_any_rights(dept_id, right_codes, user, **kwargs)
+    codes = [code for code in right_codes if code]
+    if not codes:
         return False
     return UserDepartmentRight.objects.filter(
         user_id=user.id,
         department_id=dept_id,
-        right__module__iexact=module,
-        right__name__in=list(right_codes),
+        right__module__iexact=module_code,
+        right__name__in=codes,
     ).exists()
 
 def has_notif_role(department_or_code, role_code: str, user) -> bool:
@@ -201,6 +218,110 @@ def has_notif_role(department_or_code, role_code: str, user) -> bool:
         role__name__iexact=role_code,
         user_id=user.id,
     ).exists()
+
+
+# =============================
+#  FINANCE-МОДУЛЬНЫЕ ПРАВА
+# =============================
+
+FINANCE_RIGHT_FIELD_MAP = {
+    "budget_approver": "budget_approver",
+    "approver": "budget_approver",
+    "budget_coordinator": "budget_coordinator",
+    "coordinator": "budget_coordinator",
+    "request_preparer": "request_preparer",
+    "preparer": "request_preparer",
+}
+
+
+def _get_finance_models():
+    if not apps.is_installed("finance"):
+        return None, None
+    try:
+        AccountingAccount = apps.get_model("finance", "AccountingAccount")
+        DepartmentBudgetAccount = apps.get_model("finance", "DepartmentBudgetAccount")
+    except LookupError:
+        return None, None
+    return AccountingAccount, DepartmentBudgetAccount
+
+
+def _normalize_finance_account(account) -> Optional[int]:
+    AccountingAccount, _ = _get_finance_models()
+    if not AccountingAccount or account is None:
+        return None
+    if isinstance(account, int):
+        return account
+    if isinstance(account, AccountingAccount):
+        return account.id
+    if isinstance(account, str):
+        account_number = account.strip()
+    else:
+        account_number = str(account).strip()
+    if not account_number:
+        return None
+    return AccountingAccount.objects.filter(
+        account_number__iexact=account_number
+    ).values_list("id", flat=True).first()
+
+
+def _resolve_finance_link(dept_id: int, **kwargs):
+    AccountingAccount, DepartmentBudgetAccount = _get_finance_models()
+    if not DepartmentBudgetAccount:
+        return None
+    account_link = kwargs.get("account_link")
+    if account_link:
+        if isinstance(account_link, DepartmentBudgetAccount) and account_link.department_id == dept_id:
+            return account_link
+        return None
+    account_id = _normalize_finance_account(kwargs.get("account"))
+    if not account_id:
+        return None
+    filters = {
+        "department_id": dept_id,
+        "account_id": account_id,
+    }
+    custom_account_name = kwargs.get("custom_account_name")
+    if custom_account_name:
+        filters["custom_account_name__iexact"] = custom_account_name
+    return DepartmentBudgetAccount.objects.filter(**filters).first()
+
+
+def _map_finance_right(right_code: str) -> Optional[str]:
+    if not right_code:
+        return None
+    return FINANCE_RIGHT_FIELD_MAP.get(right_code.lower())
+
+
+def _has_finance_right(dept_id: int, right_code: str, user, **kwargs) -> bool:
+    role_field = _map_finance_right(right_code)
+    if not role_field:
+        return False
+    link = _resolve_finance_link(dept_id, **kwargs)
+    if not link:
+        return False
+    role_user = getattr(link, role_field, None)
+    return role_user_id_safe(role_user) == role_user_id_safe(user)
+
+
+def _has_finance_any_rights(dept_id: int, right_codes: Sequence[str], user, **kwargs) -> bool:
+    normalized_codes = [field for field in (_map_finance_right(code) for code in right_codes) if field]
+    if not normalized_codes:
+        return False
+    link = _resolve_finance_link(dept_id, **kwargs)
+    if not link:
+        return False
+    user_id = role_user_id_safe(user)
+    if not user_id:
+        return False
+    for field in normalized_codes:
+        role_user = getattr(link, field, None)
+        if role_user_id_safe(role_user) == user_id:
+            return True
+    return False
+
+
+def role_user_id_safe(user_obj):
+    return getattr(user_obj, "id", None)
 
 
 # =============================
@@ -302,12 +423,12 @@ def can_notify_on_request_update(department_or_code, user: CustomUser) -> bool:
 # =============================
 
 @register.simple_tag
-def has_right(department_or_code, user, right_code: str = "") -> bool:
-    return has_dept_right(department_or_code, right_code, user)
+def has_right(department_or_code, user, right_code: str = "", module: str = "requests", **kwargs) -> bool:
+    return has_dept_right(department_or_code, right_code, user, module=module, **kwargs)
 
 @register.simple_tag
-def has_any_rights(department_or_code, user, *right_codes) -> bool:
-    return has_any_dept_rights(department_or_code, right_codes, user)
+def has_any_rights(department_or_code, user, *right_codes, module: str = "requests", **kwargs) -> bool:
+    return has_any_dept_rights(department_or_code, right_codes, user, module=module, **kwargs)
 
 @register.simple_tag
 def has_notif(department_or_code, user, role_code: str) -> bool:
