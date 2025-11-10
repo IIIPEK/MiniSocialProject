@@ -63,21 +63,6 @@ def request_list(request):
 def request_create_or_edit(request, pk=None):
     instance = get_object_or_404(Request, pk=pk) if pk else None
 
-    def _resolve_dept_for_request(obj_or_form):
-        """
-        Пытаемся извлечь департамент для проверки прав:
-        - из существующей заявки (obj.department)
-        - из формы (form.cleaned_data.get("department") или form.instance.department)
-        """
-        dept = None
-        if hasattr(obj_or_form, "department") and obj_or_form.department:
-            dept = obj_or_form.department
-        elif hasattr(obj_or_form, "cleaned_data"):
-            dept = obj_or_form.cleaned_data.get("department") or getattr(obj_or_form.instance, "department", None)
-        else:
-            dept = getattr(obj_or_form.instance, "department", None)
-        return dept
-
     # if pk and instance.requester != request.user:
     #     return redirect('requests:request_list')
 
@@ -104,7 +89,6 @@ def request_create_or_edit(request, pk=None):
 
     if request.method == 'POST':
         form = RequestForm(request.POST, instance=instance)
-        dept = _resolve_dept_for_request(form if is_create else instance)
         if form.is_valid():
             req = form.save(commit=False)
             req.requester = request.user

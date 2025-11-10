@@ -64,3 +64,4 @@ junit-*.xml
 docker-compose.override.yml
 
 /MiniSocialProject.zip
+test.json
